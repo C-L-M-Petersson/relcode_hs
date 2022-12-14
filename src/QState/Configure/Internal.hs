@@ -1,4 +1,4 @@
-module QState.Internal.Configure where
+module QState.Configure.Internal where
 
 import           Data.Char
 import           Data.Composition
@@ -76,11 +76,6 @@ loadCDict = CDict . M.fromList <$> ((++)<$>getCDictFileKVs<*>getArgKVs)
 
 
 
-insertCDict :: String -> String -> CDict -> CDict
-insertCDict k v = CDict . M.insert k v . cDictMap
-
-
-
 cDictReadOption :: Read a => String -> CDict -> a
 cDictReadOption = read.:cDictOption
 
@@ -92,3 +87,4 @@ cDictOption k = fromMaybe (error $ "option "++k++" not passed") . cDictOptionSaf
 
 cDictOptionSafe :: String -> CDict -> Maybe String
 cDictOptionSafe k = M.lookup k . cDictMap
+

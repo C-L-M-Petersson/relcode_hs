@@ -11,6 +11,10 @@ module QState
 ,   getOptionSafe
 ,   getReadOption
 ,   getReadOptionSafe
+
+,   getEnergyUnit
+
+,   getOmegasXUV
 ) where
 
 import           Control.Monad.State
@@ -19,8 +23,9 @@ import           Data.Composition
 
 import           Maths.QuantumNumbers
 
+import           QState.Configure
 import           QState.Internal
-import           QState.Internal.Configure
+import           QState.Units.Internal
 
 
 type QState a = StateT System IO a
@@ -47,6 +52,11 @@ getReadOption     = (<$>getCDict) . cDictReadOption
 
 getReadOptionSafe :: Read a => String -> QState (Maybe a)
 getReadOptionSafe = (<$>getCDict) . cDictReadOptionSafe
+
+
+
+getEnergyUnit :: QState EnergyUnit
+getEnergyUnit = gets eUnit
 
 
 

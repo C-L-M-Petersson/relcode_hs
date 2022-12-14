@@ -2,7 +2,7 @@ module QState.Internal.Input.Directories where
 
 import           Maths.QuantumNumbers
 
-import           QState.Internal.Configure
+import           QState.Configure
 
 
 runDir :: CDict -> FilePath

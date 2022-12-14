@@ -1,16 +1,17 @@
 {-# LANGUAGE FlexibleInstances #-}
 module Maths.HilbertSpace.DensityMatrix where
 
-import           Maths.HilbertSpace
-
+import           Maths.HilbertSpace.Ket
+import           Maths.HilbertSpace.Norm
+import           Maths.HilbertSpace.Operator
+import           Maths.HilbertSpace.Scalar
 
 
 type DensityMatrix = Operator
 
 instance Normalisable DensityMatrix where
-    norm  = trace
-    scale = fmap . (.|>)
-
+    norm  = assertReal . trace
+    scale = opmap . (.|>) . fromReal
 
 
 

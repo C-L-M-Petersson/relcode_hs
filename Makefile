@@ -20,8 +20,12 @@ MAIN=$(SRCDIR)/Main.hs
 GHC=ghc --make
 GHCDIRS=-odir $(ODIR) -hidir $(HIDIR) -i$(SRCDIR)
 GHCOPTS=-dynamic -O2 $(patsubst %, -package %, $(GHCPKGS))
-GHCPKGS=base                  \
-        split
+GHCPKGS=base        \
+        composition \
+        mtl         \
+        safe        \
+        split       \
+        utility-ht
         #bytestring            \
         #composition           \
         #directory             \
@@ -33,7 +37,6 @@ GHCPKGS=base                  \
         #silently              \
         #system-posix-redirect \
         #unix                  \
-        #utility-ht
 
 # }}}
 

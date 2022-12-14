@@ -1,0 +1,3 @@
+localbuild/*
+run.x
+**/*.sw*

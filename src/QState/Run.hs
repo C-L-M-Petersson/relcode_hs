@@ -4,8 +4,9 @@ import           System.Directory
 import           Control.Monad.State
 
 import           QState
+import           QState.Configure
+import           QState.Configure.Internal
 import           QState.Internal
-import           QState.Internal.Configure
 
 
 runQState :: QState a -> IO a
@@ -22,6 +23,8 @@ initialiseQState = do
 
     return System
            { cDict     = cDict
+           , eUnit     = cDictReadOption "units" cDict
+
            , twoPhoton = "second_photon"`elem`runDirFiles
 
            , omegasXUV = omegasXUV

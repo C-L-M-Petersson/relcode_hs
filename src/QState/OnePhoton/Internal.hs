@@ -3,12 +3,24 @@ module QState.OnePhoton.Internal
 ,   amps
 ,   phaseF
 ,   phaseG
+
+,   matElem
+,   matElems
+
+--,   excitedState
 ) where
 
-import           Maths.QuantumNumbers
+import                Data.Composition
+import                Data.List
 
-import           QState.Internal.Configure
-import           QState.Internal.Input.Directories
+import                Maths.HilbertSpace
+import                Maths.QuantumNumbers
+
+import                QState.Configure
+import                QState.HartreeFock.Internal
+import                QState.Internal.Input.Directories
+import                QState.Light.Internal
+import                QState.Utility.Internal
 
 
 fileLines :: String -> QNum -> QNum -> CDict -> IO [String]
@@ -32,6 +44,12 @@ readFileCol file kappa0 n kappa1 cDict = map (read . (!!col) . words)
 omegas :: QNum -> QNum -> CDict -> IO [Double]
 omegas = readFileLines "omega.dat"
 
+eKins  :: QNum -> QNum -> CDict -> IO [Double]
+eKins kappa0 n0 cDict = do
+    hfE <- hfEnergy kappa0 n0 cDict
+    os  <- omegas   kappa0 n0 cDict
+    return $ map (+hfE) os
+
 amps :: QNum -> QNum -> QNum -> CDict -> IO [Double]
 amps = readFileCol "/amp_all.dat"
 
@@ -40,3 +58,19 @@ phaseF = readFileCol "/phaseF_all.dat"
 
 phaseG :: QNum -> QNum -> QNum -> CDict -> IO [Double]
 phaseG = readFileCol "/phaseG_all.dat"
+
+
+
+matElem :: QNum -> QNum -> QNum -> CDict -> IO [Scalar]
+matElem kappa0 n0 kappa1 cDict = map product . transpose
+    <$>sequence [ map        fromReal <$>amps   kappa0 n0 kappa1 cDict
+                , map (exp . fromImag)<$>phaseF kappa0 n0 kappa1 cDict
+                , map (exp . fromImag  . negate . coulombPhase kappa1)
+                                      <$>eKins kappa0 n0 cDict
+                ]
+
+matElems :: [QNum] -> [QNum] -> [QNum] -> CDict -> IO [Scalar]
+matElems  []               []      _       cDict = return $ repeat 0
+matElems (kappa0:kappas0) (n0:ns0) kappas1 cDict = map product . transpose
+    <$>sequence ( matElems kappas0 ns0 kappas1 cDict
+                : map (flip (matElem kappa0 n0) cDict) kappas1 )

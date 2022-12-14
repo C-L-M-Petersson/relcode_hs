@@ -5,14 +5,21 @@ import           Control.Applicative hiding ((<|>))
 import           Data.List
 import           Data.Maybe
 
+import           Maths.HilbertSpace.Distribution
 import           Maths.HilbertSpace.Scalar
 
 import           Safe
 
 
-data Ket = Ket { basis    :: Maybe [Double]
+data Ket = Ket { ketBasis :: Maybe [Double]
                , ketElems :: [Scalar]
                }
+
+instance Distributed Ket where
+    norm2         k = assertReal(k<|>k)
+    scale           = (.|>) . fromReal
+    basis           = ketBasis
+    modifyBasis f k = k{ ketBasis = f<$>ketBasis k }
 
 instance Num Ket where
       negate      = kmap negate
@@ -53,4 +60,10 @@ liftKet2 f (Ket mb es) (Ket mb' es') = Ket (headMay $ catMaybes [mb,mb'])
 (.|>) = kmap . (*)
 
 (<|>) :: Ket -> Ket -> Scalar
-k<|>k' = sum . ketElems $ (<|)k*k'
+k<|>k' = ((<|)k)|>|>k'
+
+(|>|>) :: Ket -> Ket -> Scalar
+k|>|>k'
+    | basis k==basis k' = (fromReal(delta k)*) . sum . ketElems $ k*k'
+    | otherwise         = error $ "taking scalar product of kets with different"
+                                ++" bases"

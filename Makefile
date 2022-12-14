@@ -22,6 +22,7 @@ GHCDIRS=-odir $(ODIR) -hidir $(HIDIR) -i$(SRCDIR)
 GHCOPTS=-dynamic -O2 $(patsubst %, -package %, $(GHCPKGS))
 GHCPKGS=base        \
         composition \
+        extra       \
         mtl         \
         safe        \
         split       \

@@ -1,22 +1,26 @@
 {-# LANGUAGE FlexibleInstances #-}
 module Maths.HilbertSpace.DensityMatrix where
 
+import           Data.List
+import           Data.Tuple.Extra
+
 import           Maths.HilbertSpace.Ket
-import           Maths.HilbertSpace.Norm
+import           Maths.HilbertSpace.Distribution
 import           Maths.HilbertSpace.Operator
 import           Maths.HilbertSpace.Scalar
 
 
 type DensityMatrix = Operator
 
-instance Normalisable DensityMatrix where
-    norm  = assertReal . trace
-    scale = opmap . (.|>) . fromReal
-
 
 
 fromState :: Ket -> DensityMatrix
-fromState k = k|><|k
+fromState k = normalise(k|><|k)
 
 fromStates :: [Ket] -> DensityMatrix
-fromStates = sum . map fromState
+fromStates = normalise . sum . map (uncurry (|><|) . dupe)
+
+
+
+purity :: DensityMatrix -> Double
+purity = assertReal . trace . (^2)

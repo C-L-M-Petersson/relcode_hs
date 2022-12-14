@@ -16,5 +16,3 @@ getHFEnergy = withCDictM.:hfEnergy
 
 getGroundStateShiftedOmegas :: QNum -> QNum -> QState [Double]
 getGroundStateShiftedOmegas kappa0 n0 = withCDictM (omegas kappa0 n0)
---getGroundStateShiftedOmegas kappa0 n0 = withCDictM (omegas kappa0 n0)>>=
---    withCDictM . groundStateShift kappa0 n0

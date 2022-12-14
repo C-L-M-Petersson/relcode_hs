@@ -19,8 +19,6 @@ module Maths.HilbertSpace.Scalar
 
 import           Data.Complex
 
-import           Maths.HilbertSpace.Norm
-
 
 newtype Scalar = Scalar { val :: Complex Double }
 
@@ -31,6 +29,8 @@ instance Floating Scalar where
         pi    = Scalar pi
         exp   = smap exp
         log   = smap log
+        sqrt  = smap sqrt
+        (**)  = liftScalar (**)
         sin   = smap sin
         cos   = smap cos
         asin  = smap asin
@@ -42,15 +42,9 @@ instance Floating Scalar where
         acosh = smap acosh
         atanh = smap atanh
 
-
-
 instance Fractional Scalar where
     (/)          = liftScalar (/)
     fromRational = Scalar . fromRational
-
-instance Normalisable Scalar where
-    norm2   s = toReal(conj s*s)
-    scale d s = fromReal d*s
 
 instance Num Scalar where
     negate      = smap negate
@@ -67,8 +61,8 @@ instance Ord Scalar where
 instance Show Scalar where
     show (Scalar (r:+i))
         | r==0&&i==0 = "0"
-        | r==0       = show r
-        | i==0       = show r++"i"
+        | r==0       = show i++"i"
+        | i==0       = show r
         | i< 0       = show r++show i++"i"
         | otherwise  = show r++"+"++show i
 

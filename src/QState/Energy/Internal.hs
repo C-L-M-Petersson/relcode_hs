@@ -3,7 +3,7 @@ module QState.Energy.Internal where
 import                Maths.HilbertSpace.Ket
 import                Maths.HilbertSpace.Scalar
 
-import                QState.Configure
+import                QState.Configure.Internal
 import                QState.Units.Internal
 
 

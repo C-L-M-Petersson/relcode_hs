@@ -1,13 +1,24 @@
 module QState.Configure
 (   CDict
 
-,   cDictReadOption
-,   cDictReadOptionSafe
-,   cDictOption
-,   cDictOptionSafe
+,   getOption
+,   getOptionSafe
+,   getReadOption
+,   getReadOptionSafe
 ) where
 
+import           QState
 import           QState.Configure.Internal
 
 
---cDictReadEnergyOption :
+getOption         ::           String -> QState String
+getOption         = (<$>getCDict) . cDictOption
+
+getOptionSafe     ::           String -> QState (Maybe String)
+getOptionSafe     = (<$>getCDict) . cDictOptionSafe
+
+getReadOption     :: Read a => String -> QState a
+getReadOption     = (<$>getCDict) . cDictReadOption
+
+getReadOptionSafe :: Read a => String -> QState (Maybe a)
+getReadOptionSafe = (<$>getCDict) . cDictReadOptionSafe

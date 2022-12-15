@@ -9,7 +9,7 @@ import           Maths.QuantumNumbers
 import           System.Directory
 import           System.FilePath
 
-import           QState.Configure
+import           QState.Configure.Internal
 
 
 cDictFilePath :: String -> CDict -> FilePath

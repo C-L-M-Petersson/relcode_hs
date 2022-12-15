@@ -1,6 +1,6 @@
 module QState.Units.Internal where
 
-import                QState.Configure.Internal
+import           QState.Configure.Internal
 
 
 class Unit a where

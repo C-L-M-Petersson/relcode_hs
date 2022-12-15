@@ -6,8 +6,8 @@ data QNum = QNum { base :: Int
                  } deriving(Eq)
 
 instance Fractional QNum where
-    QNum b False/QNum 2 False    = QNum (b`div`2) (odd b)
-    _           /_               = errNonHalfInteger
+    QNum b False/QNum 2 False = QNum (b`div`2) (odd b)
+    _           /_            = errNonHalfInteger
     fromRational r
         | abs(r-floored    )<lim = QNum (floor r) False
         | abs(r-floored-1/2)<lim = QNum (floor r) True

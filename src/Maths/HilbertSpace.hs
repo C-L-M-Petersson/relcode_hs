@@ -7,7 +7,7 @@ module Maths.HilbertSpace
 ) where
 
 
-import           Maths.HilbertSpace.Ket
 import           Maths.HilbertSpace.Distribution
+import           Maths.HilbertSpace.Ket
 import           Maths.HilbertSpace.Operator
 import           Maths.HilbertSpace.Scalar

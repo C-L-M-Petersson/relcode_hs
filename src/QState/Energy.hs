@@ -4,8 +4,8 @@ import           Control.Monad
 
 import           Data.Composition
 
-import           Maths.Interpolate
 import           Maths.HilbertSpace
+import           Maths.Interpolate
 
 import           QState
 import           QState.Energy.Internal

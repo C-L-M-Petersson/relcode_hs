@@ -1,6 +1,6 @@
 module Maths.HilbertSpace.Ket where
 
-import           Control.Applicative hiding ((<|>))
+import           Control.Applicative             hiding ((<|>))
 
 import           Data.List
 import           Data.Maybe

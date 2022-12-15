@@ -15,7 +15,8 @@ module Maths.QuantumNumbers
 import           Data.Composition
 
 import           Maths.QuantumNumbers.Error
-import           Maths.QuantumNumbers.Internal (QNum,intFromQNum,doubleFromQNum)
+import           Maths.QuantumNumbers.Internal (QNum, intFromQNum,
+                                                doubleFromQNum)
 import qualified Maths.QuantumNumbers.Internal as I
 
 

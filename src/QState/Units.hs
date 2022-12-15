@@ -1,7 +1,7 @@
 module QState.Units where
 
-import                QState
-import                QState.Units.Internal
+import           QState
+import           QState.Units.Internal
 
 
 toEnergyUnit   :: Fractional a => a -> QState a

@@ -8,17 +8,17 @@ module QState.OnePhoton.Internal
 ,   matElems
 ) where
 
-import                Data.Composition
-import                Data.List
+import           Data.Composition
+import           Data.List
 
-import                Maths.HilbertSpace
-import                Maths.QuantumNumbers
+import           Maths.HilbertSpace
+import           Maths.QuantumNumbers
 
-import                QState.Configure
-import                QState.Energy.Internal
-import                QState.FilePath.Internal
-import                QState.HartreeFock.Internal
-import                QState.Utility.Internal
+import           QState.Configure
+import           QState.Energy.Internal
+import           QState.FilePath.Internal
+import           QState.HartreeFock.Internal
+import           QState.Utility.Internal
 
 
 fileLines :: String -> QNum -> QNum -> CDict -> IO [String]

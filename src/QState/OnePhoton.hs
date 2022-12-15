@@ -3,8 +3,8 @@ module QState.OnePhoton where
 import           Data.Composition
 import           Data.List
 
-import           Maths.Interpolate
 import           Maths.HilbertSpace
+import           Maths.Interpolate
 import           Maths.QuantumNumbers
 
 import           QState

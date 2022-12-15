@@ -1,12 +1,13 @@
 module QState.Run where
 
-import           System.Directory
 import           Control.Monad.State
 
 import           QState
 import           QState.Configure
 import           QState.Configure.Internal
 import           QState.Internal
+
+import           System.Directory
 
 
 runQState :: QState a -> IO a

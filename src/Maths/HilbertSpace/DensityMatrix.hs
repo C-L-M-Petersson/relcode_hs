@@ -4,8 +4,8 @@ module Maths.HilbertSpace.DensityMatrix where
 import           Data.List
 import           Data.Tuple.Extra
 
-import           Maths.HilbertSpace.Ket
 import           Maths.HilbertSpace.Distribution
+import           Maths.HilbertSpace.Ket
 import           Maths.HilbertSpace.Operator
 import           Maths.HilbertSpace.Scalar
 

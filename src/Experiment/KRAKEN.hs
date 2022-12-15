@@ -17,12 +17,11 @@ import           QState.Output
 
 
 kraken1ph :: [QNum] -> [QNum] -> [QNum] -> QState ()
-kraken1ph kappas0 ns0 kappas1 = do
-    rho <- getDensityMatrix kappas0 ns0 kappas1
-
-    saveData "Rho1ph"                       rho
-    saveData "Purity1ph"      $ purity      rho
-    saveData "Concurrence1ph" $ concurrence rho
+kraken1ph kappas0 ns0 kappas1 = getDensityMatrix kappas0 ns0 kappas1>>=
+    forM_ [ saveData "Rho1ph"
+          , saveData "Purity1ph"      . purity
+          , saveData "Concurrence1ph" . concurrence
+          ] . flip ($)
     where saveData key val = whenM (getReadOption ("save"   ++key))
                                 $ printQStateFile ("outFile"++key) val
 

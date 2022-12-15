@@ -15,7 +15,7 @@ getXUV :: QState Pulse
 getXUV = withCDict . xuv=<<getEnergyUnit
 
 getXUVKetOnGrid :: [Double] -> QState Ket
-getXUVKetOnGrid es = join $ withCDict . xuvKet es<$>getEnergyUnit
+getXUVKetOnGrid es = getEnergyUnit>>=withCDict . xuvKet es
 
 getXUVKet :: QState Ket
 getXUVKet = getOmegasXUV>>=getXUVKetOnGrid

@@ -23,4 +23,7 @@ fromStates = normalise . sum . map (uncurry (|><|) . dupe)
 
 
 purity :: DensityMatrix -> Double
-purity = assertReal . trace . (^2)
+purity rho = assertReal $ trace (rho^2)
+
+concurrence :: DensityMatrix -> Double
+concurrence rho = sqrt( 2*(1-purity rho) )

@@ -3,7 +3,7 @@ module QState.HartreeFock.Internal where
 import           Maths.QuantumNumbers
 
 import           QState.Configure
-import           QState.Directories.Internal
+import           QState.FilePath.Internal
 
 
 hfEnergy :: QNum -> QNum -> CDict -> IO Double

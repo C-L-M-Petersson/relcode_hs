@@ -5,15 +5,16 @@ import           Data.Maybe
 
 
 class Distributed a where
-    {-# MINIMAL (norm | norm2), scale, basis, modifyBasis #-}
+    {-# MINIMAL (norm | norm2), scale, basis, (setBasis | modifyBasis) #-}
     norm  :: a -> Double
     norm2 :: a -> Double
     scale :: Double -> a -> a
     normalise :: a -> a
 
     basis            :: a -> Maybe [Double]
-    modifyBasis      :: ([Double] -> [Double]) -> a -> a
-    modifyBasisElems :: ( Double  ->  Double ) -> a -> a
+    setBasis         :: Maybe [Double] -> a -> a
+    modifyBasis      :: ([Double] -> Maybe [Double]) -> a -> a
+    modifyBasisElems :: (Double -> Double) -> a -> a
     delta            :: a -> Double
     timesDelta       :: a -> a
     byDelta          :: a -> a
@@ -25,12 +26,16 @@ class Distributed a where
     norm2 = (**2) . norm
     normalise x = (1/norm x)`scale`x
 
+    {-# INLINE setBasis #-}
+    {-# INLINE modifyBasis #-}
+    setBasis        = modifyBasis . const
+    modifyBasis f d = setBasis (basis d>>=f) d
 
     {-# INLINE modifyBasisElems #-}
     {-# INLINE delta            #-}
     {-# INLINE timesDelta       #-}
     {-# INLINE byDelta          #-}
-    modifyBasisElems = modifyBasis . map
+    modifyBasisElems f = modifyBasis (Just . map f)
     delta d
         | isJust (basis d) = let xs = fromJust $ basis d
                               in (last xs-head xs)/(genericLength xs-1)
@@ -40,3 +45,11 @@ class Distributed a where
 
 shiftBasis :: Distributed a => Double -> a -> a
 shiftBasis = modifyBasisElems . (+)
+
+
+
+basisHead :: Distributed a => a -> Maybe Double
+basisHead d = head<$>basis d
+
+basisTail :: Distributed a => a -> Maybe Double
+basisTail d = last<$>basis d

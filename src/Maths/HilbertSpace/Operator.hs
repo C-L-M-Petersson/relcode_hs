@@ -16,10 +16,10 @@ data Operator = Operator { opBasisOuter :: Maybe [Double]
                          }
 
 instance Distributed Operator where
-    norm          o = assertReal (trace o)
-    scale           = (.|><|) . fromReal
-    basis           = opBasisOuter
-    modifyBasis f o = o{ opBasisOuter = f<$>opBasisOuter o }
+    norm       o = assertReal (trace o)
+    scale        = (.|><|) . fromReal
+    basis        = opBasisOuter
+    setBasis b o = o{ opBasisOuter = b }
 
 instance Num Operator where
       negate        = opmap negate

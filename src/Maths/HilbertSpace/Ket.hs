@@ -16,10 +16,10 @@ data Ket = Ket { ketBasis :: Maybe [Double]
                }
 
 instance Distributed Ket where
-    norm2         k = assertReal(k<|>k)
-    scale           = (.|>) . fromReal
-    basis           = ketBasis
-    modifyBasis f k = k{ ketBasis = f<$>ketBasis k }
+    norm2      k = assertReal(k<|>k)
+    scale        = (.|>) . fromReal
+    basis        = ketBasis
+    setBasis b k = k{ ketBasis = b }
 
 instance Num Ket where
       negate      = kmap negate
@@ -60,7 +60,7 @@ liftKet2 f (Ket mb es) (Ket mb' es') = Ket (headMay $ catMaybes [mb,mb'])
 (.|>) = kmap . (*)
 
 (<|>) :: Ket -> Ket -> Scalar
-k<|>k' = ((<|)k)|>|>k'
+k<|>k' = (<|)k|>|>k'
 
 (|>|>) :: Ket -> Ket -> Scalar
 k|>|>k'

@@ -1,11 +1,19 @@
-module QState.Directories where
+module QState.FilePath where
 
 import           Data.Composition
 
 import           Maths.QuantumNumbers
 
 import           QState
-import           QState.Directories.Internal
+import           QState.FilePath.Internal
+
+
+getCDictFilePath :: String -> QState FilePath
+getCDictFilePath = withCDict . cDictFilePath
+
+createParentDir :: String -> QState()
+createParentDir = withCDictM . createCDictParentDir
+
 
 
 getRunDir :: QState FilePath

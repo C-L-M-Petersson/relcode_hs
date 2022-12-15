@@ -15,9 +15,9 @@ import                Maths.HilbertSpace
 import                Maths.QuantumNumbers
 
 import                QState.Configure
-import                QState.Directories.Internal
+import                QState.Energy.Internal
+import                QState.FilePath.Internal
 import                QState.HartreeFock.Internal
-import                QState.Light.Internal
 import                QState.Utility.Internal
 
 
@@ -26,16 +26,18 @@ fileLines file kappa n cDict = lines<$>readFile fp
     where fp = pertDir kappa n cDict++"/"++file
 
 readFileLines :: Read a => String -> QNum -> QNum -> CDict -> IO [a]
-readFileLines file kappa n cDict = map read . lines<$>readFile fp
-    where fp = pertDir kappa n cDict++"/"++file
+readFileLines file kappa n cDict = map read<$>fileLines file kappa n cDict
 
-readFileCol :: Read a => String -> QNum -> QNum -> QNum -> CDict -> IO [a]
-readFileCol file kappa0 n kappa1 cDict = map (read . (!!col) . words)
-                                            <$>fileLines file kappa0 n cDict
+readFileCol :: (Num a,Read a) => String -> QNum -> QNum -> QNum -> CDict
+                                                                    -> IO [a]
+readFileCol file kappa0 n kappa1 cDict
+    | col== -1  = (`replicate`0) . length     <$>fileLines file kappa0 n cDict
+    | otherwise = map (read . (!!col) . words)<$>fileLines file kappa0 n cDict
     where col
-            | kappa1==  kappa0-signum kappa0 = 1
-            | kappa1== -kappa0               = 2
-            | kappa1==  kappa0+signum kappa0 = 3
+            | kappa1==  kappa0-signum kappa0 =  1
+            | kappa1== -kappa0               =  2
+            | kappa1==  kappa0+signum kappa0 =  3
+            | otherwise                      = -1
 
 
 

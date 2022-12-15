@@ -6,8 +6,6 @@ module QState.OnePhoton.Internal
 
 ,   matElem
 ,   matElems
-
---,   excitedState
 ) where
 
 import                Data.Composition
@@ -17,8 +15,8 @@ import                Maths.HilbertSpace
 import                Maths.QuantumNumbers
 
 import                QState.Configure
+import                QState.Directories.Internal
 import                QState.HartreeFock.Internal
-import                QState.Internal.Input.Directories
 import                QState.Light.Internal
 import                QState.Utility.Internal
 

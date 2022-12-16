@@ -57,7 +57,8 @@ loadCDict = CDict . M.fromList <$> ((++)<$>getCDictFileKVs<*>getArgKVs)
         getCDictFileKVs = (cDictFp>>=readFile)<&>parseCDictFile
 
         cDictFp :: IO FilePath
-        cDictFp = headDef defCDictFp . tailSafe . dropWhile (/="--cfg")<$>getArgs
+        cDictFp = headDef defCDictFp . tailSafe . dropWhile (/="--cfg")
+                                                                <$>getArgs
             where defCDictFp = "kraken.cfg"
 
         parseCDictFile :: FilePath -> [(String,String)]
@@ -77,14 +78,19 @@ loadCDict = CDict . M.fromList <$> ((++)<$>getCDictFileKVs<*>getArgKVs)
 
 
 cDictReadOption :: Read a => String -> CDict -> a
-cDictReadOption = read.:cDictOption
+cDictReadOption k = readOptionVal k . cDictOption k
 
 cDictReadOptionSafe :: Read a => String -> CDict -> Maybe a
-cDictReadOptionSafe = (<$>)read.:cDictOptionSafe
+cDictReadOptionSafe k = (readOptionVal k<$>) . cDictOptionSafe k
 
 cDictOption :: String -> CDict -> String
-cDictOption k = fromMaybe (error $ "option "++k++" not passed") . cDictOptionSafe k
+cDictOption k = fromMaybe (error $ "option "++k++" not passed")
+              . cDictOptionSafe k
 
 cDictOptionSafe :: String -> CDict -> Maybe String
 cDictOptionSafe k = M.lookup k . cDictMap
 
+readOptionVal :: Read a => String -> String -> a
+readOptionVal k v = let mrv = readMay v in if isJust mrv
+    then fromJust mrv
+    else error $ "value "++v++" of option "++k++" can not be read"

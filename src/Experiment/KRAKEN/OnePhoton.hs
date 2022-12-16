@@ -18,7 +18,6 @@ import           QState.Output
 kraken1ph :: QState()
 kraken1ph = whenRunKraken1ph . join $ kraken1phForQNums
     <$>getReadOption "kappas0"<*>getReadOption "ns0"<*>getReadOption "kappas1"
---    <$>getReadOption "kappas0"<*>getReadOption "ns0"<*>getReadOption "kappas1"
 
 kraken1phForQNums :: [QNum] -> [QNum] -> [QNum] -> QState()
 kraken1phForQNums kappas0 ns0 kappas1 = whenRunKraken1ph $

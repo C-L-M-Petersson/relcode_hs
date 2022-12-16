@@ -46,10 +46,13 @@ instance Ord QNum where
         | otherwise = False
 
 instance Read QNum where
-    readsPrec _ str = [(uncurry QNum $ parseStr str,"")]
-        where parseStr xs
-                | take 2 (reverse xs)=="2/" = ((read xs'-1)`div`2,True )
-                | otherwise                 = ( read xs          ,False)
+    readsPrec _ str = let (strHead,strTail) = (`elem`"-0123456789/")`span`str
+                       in [(parseStr strHead,strTail)]
+        where
+            parseStr :: String -> QNum
+            parseStr xs
+                | take 2 (reverse xs)=="2/" = QNum ((read xs'-1)`div`2) True
+                | otherwise                 = QNum ( read xs          ) False
                 where xs' = reverse . drop 2 $ reverse xs
 
 instance Show QNum where

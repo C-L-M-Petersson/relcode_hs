@@ -24,3 +24,6 @@ getHFDir = withCDict hfDir
 
 getPertDir :: QNum -> QNum -> QState FilePath
 getPertDir = withCDict.:pertDir
+
+getSecondPhotonDir :: QState FilePath
+getSecondPhotonDir = withCDict secondPhotonDir

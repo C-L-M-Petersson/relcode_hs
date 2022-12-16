@@ -21,28 +21,37 @@ import           QState.HartreeFock.Internal
 import           QState.Utility.Internal
 
 
-fileLines :: String -> QNum -> QNum -> CDict -> IO [String]
-fileLines file kappa n cDict = lines<$>readFile fp
-    where fp = pertDir kappa n cDict++"/"++file
+fileLines :: FilePath -> QNum -> QNum -> CDict -> IO [String]
+fileLines file kappa0 n0 cDict = lines<$>readFile fp
+    where fp = pertDir kappa0 n0 cDict++"/"++file++".dat"
 
-readFileLines :: Read a => String -> QNum -> QNum -> CDict -> IO [a]
-readFileLines file kappa n cDict = map read<$>fileLines file kappa n cDict
+fileCol :: FilePath -> QNum -> QNum -> Int -> CDict -> IO [String]
+fileCol file kappa0 n0 col cDict = map ((!!col) . words)
+                                            <$>fileLines file kappa0 n0 cDict
 
-readFileCol :: (Num a,Read a) => String -> QNum -> QNum -> QNum -> CDict
+readFileLines :: Read a => FilePath -> QNum -> QNum -> CDict -> IO [a]
+readFileLines file kappa0 n0 cDict = map read<$>fileLines file kappa0 n0 cDict
+
+readFileColIndex :: (Num a,Read a) => FilePath -> QNum -> QNum -> Int -> CDict
                                                                     -> IO [a]
-readFileCol file kappa0 n kappa1 cDict
-    | col== -1  = (`replicate`0) . length     <$>fileLines file kappa0 n cDict
-    | otherwise = map (read . (!!col) . words)<$>fileLines file kappa0 n cDict
+readFileColIndex file kappa0 n0 col cDict = map read
+                                            <$>fileCol file kappa0 n0 col cDict
+
+readFileColKappa :: (Num a,Read a) => FilePath -> QNum -> QNum -> QNum -> CDict
+                                                                    -> IO [a]
+readFileColKappa file kappa0 n0 kappa1 cDict
+    | col== -1  = (`replicate`0) . length<$>fileLines file kappa0 n0 cDict
+    | otherwise = readFileColIndex file kappa0 n0 col cDict
     where col
-            | kappa1==  kappa0-signum kappa0 =  1
-            | kappa1== -kappa0               =  2
-            | kappa1==  kappa0+signum kappa0 =  3
+            | kappa1==  kappa0-signum kappa0 =  0
+            | kappa1== -kappa0               =  1
+            | kappa1==  kappa0+signum kappa0 =  2
             | otherwise                      = -1
 
 
 
 omegas :: QNum -> QNum -> CDict -> IO [Double]
-omegas = readFileLines "omega.dat"
+omegas = readFileLines "omega"
 
 eKins  :: QNum -> QNum -> CDict -> IO [Double]
 eKins kappa0 n0 cDict = do
@@ -51,13 +60,13 @@ eKins kappa0 n0 cDict = do
     return $ map (+hfE) os
 
 amps :: QNum -> QNum -> QNum -> CDict -> IO [Double]
-amps = readFileCol "/amp_all.dat"
+amps = readFileColKappa "/amp_all"
 
 phaseF :: QNum -> QNum -> QNum -> CDict -> IO [Double]
-phaseF = readFileCol "/phaseF_all.dat"
+phaseF = readFileColKappa "/phaseF_all"
 
 phaseG :: QNum -> QNum -> QNum -> CDict -> IO [Double]
-phaseG = readFileCol "/phaseG_all.dat"
+phaseG = readFileColKappa "/phaseG_all"
 
 
 

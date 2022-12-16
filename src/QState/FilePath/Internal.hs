@@ -37,3 +37,6 @@ hfDir cDict = cDictFilePath "runDir" cDict++"/hf_wavefunctions/"
 pertDir :: QNum -> QNum -> CDict -> FilePath
 pertDir kappa n cDict = cDictFilePath "runDir" cDict
                 ++"/pert_"++show kappa++"_"++show (n-lFromKappa kappa)++"/"
+
+secondPhotonDir :: CDict -> FilePath
+secondPhotonDir cDict = cDictFilePath "runDir" cDict++"/second_photon/"

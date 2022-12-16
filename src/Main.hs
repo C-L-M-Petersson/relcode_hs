@@ -15,8 +15,11 @@ import           QState.FilePath
 import           QState.HartreeFock
 import           QState.OnePhoton
 import           QState.OnePhoton.Internal
+import           QState.TwoPhoton
+import           QState.TwoPhoton.Internal
 import           QState.Run
 
 
 main :: IO()
-main = runQState $ kraken1ph
+main = runQState $ withCDictM (mElement (-2) (3) (-1) (-2) 1)>>=mapM_ printQState
+--main = runQState $ kraken1ph

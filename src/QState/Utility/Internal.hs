@@ -18,7 +18,7 @@ waveNumber :: Double -> Double
 waveNumber e = sqrt((e*fsc + byFsc)**2 - byFsc**2) --Only relativistic
 
 coulombPhase :: QNum -> Double -> Double
-coulombPhase kappa e = phase(gamma((l+1):+(-z/k))) -l*pi/2
+coulombPhase kappa e = phase(gamma((l+1):+(-z/k))) -l*pi/2--Should the -l*pi/2 be moved?
     where
         z = 1
         l = doubleFromQNum $ lFromKappa kappa

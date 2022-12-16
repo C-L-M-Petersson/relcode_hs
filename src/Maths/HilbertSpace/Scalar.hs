@@ -16,8 +16,10 @@ module Maths.HilbertSpace.Scalar
 
 ,   conj
 ) where
+import           System.IO.Unsafe
 
 import           Data.Complex
+import           Data.List.Tools
 
 
 newtype Scalar = Scalar { val :: Complex Double }
@@ -58,13 +60,20 @@ instance Ord Scalar where
     s`compare`s' = toReal s`compare`toReal s'
     s <=      s' = toReal s <=      toReal s'
 
+instance Read Scalar where
+    readsPrec _ str = [(readHead,strTail)]
+        where
+            readHead = Scalar . uncurry (:+) . read
+                     $ takeUntil (==')') str
+            strTail  = dropUntil (==')') str
+
 instance Show Scalar where
-    show (Scalar (r:+i))
-        | r==0&&i==0 = "0"
-        | r==0       = show i++"i"
-        | i==0       = show r
-        | i< 0       = show r++show i++"i"
-        | otherwise  = show r++"+"++show i
+    show (Scalar (r:+i)) = show (r,i)
+        -- | r==0&&i==0 = "0"
+        -- | r==0       = show i++"i"
+        -- | i==0       = show r
+        -- | i< 0       = show r++show i++"i"
+        -- | otherwise  = show r++"+"++show i++"i"
 
 
 

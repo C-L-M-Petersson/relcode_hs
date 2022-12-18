@@ -7,6 +7,7 @@ module QState.TwoPhoton.Internal
 
 import           Data.Composition
 import           Data.List
+import           Data.Maybe
 
 import           Maths.HilbertSpace
 import           Maths.QuantumNumbers
@@ -34,20 +35,20 @@ readFileColIndex file col cDict = map read<$>fileCol file col cDict
 readFileColKappa :: (Num a,Read a) => FilePath -> QNum -> QNum -> QNum -> CDict
                                                                     -> IO [a]
 readFileColKappa file kappa0 kappa1 kappa2 cDict
-    | col== -1  = (`replicate`0) . length<$>fileLines file cDict
-    | otherwise = readFileColIndex file col cDict
+    | isNothing mCol = (`replicate`0) . length<$>fileLines file cDict
+    | otherwise      = readFileColIndex file (fromJust mCol) cDict
     where
-        col = colOuter+colInner
+        mCol = (+)<$>colOuter<*>colInner
         colOuter
-            | kappa1==  kappa0-signum kappa0 =  0
-            | kappa1== -kappa0               =  3
-            | kappa1==  kappa0+signum kappa0 =  6
-            | otherwise                      = -1
+            | kappa1==  kappa0-signum kappa0 = Just 0
+            | kappa1== -kappa0               = Just 3
+            | kappa1==  kappa0+signum kappa0 = Just 6
+            | otherwise                      = Nothing
         colInner
-            | kappa2==  kappa1-signum kappa0 =  0
-            | kappa2== -kappa1               =  1
-            | kappa2==  kappa1+signum kappa0 =  2
-            | otherwise                      = -1
+            | kappa2==  kappa1-signum kappa0 = Just 0
+            | kappa2== -kappa1               = Just 1
+            | kappa2==  kappa1+signum kappa0 = Just 2
+            | otherwise                      = Nothing
 
 
 

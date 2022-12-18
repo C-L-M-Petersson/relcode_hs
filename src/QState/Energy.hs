@@ -46,3 +46,9 @@ interpolateEnergyKet = (<$>getNEs) . flip changeKetGridSize
 energyKetToEkinGrid :: Ket -> QState Ket
 energyKetToEkinGrid k = (`interpolateKet`k)
                                     <$>(getEnergyUnit>>=withCDict . eKinGrid)
+
+
+
+interpolatedExcitedState :: [Double] -> [Scalar] -> QState Ket
+interpolatedExcitedState es vs = (*)<$>getInterpolatedXUVKet
+                                    <*>interpolateEnergyKet (Ket (Just es) vs)

@@ -33,7 +33,8 @@ whenRunKraken1ph :: QState() -> QState()
 whenRunKraken1ph = whenM (getReadOption "runKRAKEN1ph")
 
 
-getDensityMatrix :: [QNum] -> [QNum] -> [QNum] -> QState Operator
+
+getDensityMatrix :: [QNum] -> [QNum] -> [QNum] -> QState DensityMatrix
 getDensityMatrix kappas0 ns0 kappas1 = fromStates<$>zipWithM
     (curry (flip (uncurry getPureState) kappas1)) kappas0 ns0
 

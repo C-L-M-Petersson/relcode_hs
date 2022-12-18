@@ -43,9 +43,9 @@ readFileColKappa file kappa0 n0 kappa1 cDict
     | col== -1  = (`replicate`0) . length<$>fileLines file kappa0 n0 cDict
     | otherwise = readFileColIndex file kappa0 n0 col cDict
     where col
-            | kappa1==  kappa0-signum kappa0 =  0
-            | kappa1== -kappa0               =  1
-            | kappa1==  kappa0+signum kappa0 =  2
+            | kappa1==  kappa0-signum kappa0 =  1
+            | kappa1== -kappa0               =  2
+            | kappa1==  kappa0+signum kappa0 =  3
             | otherwise                      = -1
 
 

@@ -43,6 +43,9 @@ class Distributed a where
     timesDelta d =    delta d `scale`d
     byDelta    d = (1/delta d)`scale`d
 
+scaleBasis :: Distributed a => Double -> a -> a
+scaleBasis = modifyBasisElems . (*)
+
 shiftBasis :: Distributed a => Double -> a -> a
 shiftBasis = modifyBasisElems . (+)
 

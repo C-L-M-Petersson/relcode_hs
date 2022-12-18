@@ -3,6 +3,8 @@ module Experiment.KRAKEN.OnePhoton where
 import           Control.Monad
 import           Control.Monad.Extra
 
+import           Data.Composition
+
 import           Maths.HilbertSpace.DensityMatrix
 import           Maths.HilbertSpace.Ket
 import           Maths.HilbertSpace.Operator
@@ -21,13 +23,15 @@ kraken1ph = whenRunKraken1ph . join $ kraken1phForQNums
 
 kraken1phForQNums :: [QNum] -> [QNum] -> [QNum] -> QState()
 kraken1phForQNums kappas0 ns0 kappas1 = whenRunKraken1ph $
-    getDensityMatrix kappas0 ns0 kappas1>>=
-    forM_ [ saveData "Rho1ph"
-          , saveData "Purity1ph"      . purity
-          , saveData "Concurrence1ph" . concurrence
-          ] . flip ($)
-    where saveData key val = whenM (getReadOption ("save"   ++key))
-                                $ printQStateFile ("outFile"++key) val
+    getDensityMatrix kappas0 ns0 kappas1
+        >>=forM_ [ saveData printEnergyDistributionQStateFile "Rho1ph"
+                 , saveData printQStateFile "Purity1ph"      . purity
+                 , saveData printQStateFile "Concurrence1ph" . concurrence
+                 ] . flip ($)
+        >>getPureStateSum kappas0 ns0 kappas1
+                >>=saveData printEnergyDistributionQStateFile "Psi1ph"
+    where saveData print key val = whenM (getReadOption ("save"++key))
+                                 $ print ("outFile"++key) val
 
 whenRunKraken1ph :: QState() -> QState()
 whenRunKraken1ph = whenM (getReadOption "runKRAKEN1ph")
@@ -35,7 +39,13 @@ whenRunKraken1ph = whenM (getReadOption "runKRAKEN1ph")
 
 
 getDensityMatrix :: [QNum] -> [QNum] -> [QNum] -> QState DensityMatrix
-getDensityMatrix kappas0 ns0 kappas1 = fromStates<$>zipWithM
+getDensityMatrix = (fromStates<$>) .:. getPureStates
+
+getPureStateSum :: [QNum] -> [QNum] -> [QNum] -> QState Ket
+getPureStateSum = (sum<$>) .:. getPureStates
+
+getPureStates :: [QNum] -> [QNum] -> [QNum] -> QState [Ket]
+getPureStates kappas0 ns0 kappas1 = zipWithM
     (curry (flip (uncurry getPureState) kappas1)) kappas0 ns0
 
 getPureState :: QNum -> QNum -> [QNum] -> QState Ket

@@ -4,6 +4,8 @@ import           Control.Lens
 import           Control.Monad
 import           Control.Monad.Extra
 
+import           Data.Composition
+
 import           Maths.HilbertSpace.DensityMatrix
 import           Maths.HilbertSpace.Distribution
 import           Maths.HilbertSpace.Ket
@@ -27,13 +29,16 @@ kraken2ph = whenRunKraken2ph . join $ kraken2phForQNums
 kraken2phForQNums :: [QNum] -> [QNum] -> [QNum] -> [QNum] -> Int -> QState()
 kraken2phForQNums kappas0 ns0 kappas1 kappas2 eFinalIndex = whenRunKraken2ph $
     getReconstructedOnePhotonDensityMatrix kappas0 ns0
-                                            kappas1 kappas2 eFinalIndex>>=
-    forM_ [ saveData "Rho2ph"
-          , saveData "Purity2ph"      . purity
-          , saveData "Concurrence2ph" . concurrence
-          ] . flip ($)
-    where saveData key val = whenM (getReadOption ("save"   ++key))
-                                $ printQStateFile ("outFile"++key) val
+                                            kappas1 kappas2 eFinalIndex
+        >>=forM_ [ saveData printEnergyDistributionQStateFile "Rho2ph"
+                 , saveData printQStateFile "Purity2ph"      . purity
+                 , saveData printQStateFile "Concurrence2ph" . concurrence
+                 ] . flip ($)
+        >>getPureStateSumByOnePhotonEnergy kappas0 ns0
+                                            kappas1 kappas2 eFinalIndex
+            >>=saveData printEnergyDistributionQStateFile "Psi2ph"
+    where saveData print key val = whenM (getReadOption ("save"++key))
+                                 $ print ("outFile"++key) val
 
 whenRunKraken2ph :: QState() -> QState()
 whenRunKraken2ph = whenM (getReadOption "runKRAKEN2ph")
@@ -42,8 +47,17 @@ whenRunKraken2ph = whenM (getReadOption "runKRAKEN2ph")
 
 getReconstructedOnePhotonDensityMatrix ::  [QNum] -> [QNum] -> [QNum] -> [QNum]
                                                 -> Int -> QState DensityMatrix
-getReconstructedOnePhotonDensityMatrix kappas0 ns0 kappas1 kappas2 eFinalIndex =
-        fromStates<$>zipWithM getPureState kappas0 ns0
+getReconstructedOnePhotonDensityMatrix =
+                            (fromStates<$>).::.getPureStatesByOnePhotonEnergy
+
+getPureStateSumByOnePhotonEnergy :: [QNum] -> [QNum] -> [QNum] -> [QNum] -> Int
+                                                                -> QState Ket
+getPureStateSumByOnePhotonEnergy = (sum<$>).::.getPureStatesByOnePhotonEnergy
+
+getPureStatesByOnePhotonEnergy :: [QNum] -> [QNum] -> [QNum] -> [QNum] -> Int
+                                                                -> QState [Ket]
+getPureStatesByOnePhotonEnergy kappas0 ns0 kappas1 kappas2 eFinalIndex =
+        zipWithM getPureState kappas0 ns0
     where getPureState kappa0 n0 = getPureStateByOnePhotonEnergy kappa0 n0
                                                     kappas1 kappas2 eFinalIndex
 

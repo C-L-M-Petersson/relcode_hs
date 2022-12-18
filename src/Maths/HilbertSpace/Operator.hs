@@ -19,7 +19,7 @@ instance Distributed Operator where
     norm       o = assertReal (trace o)
     scale        = (.|><|) . fromReal
     basis        = opBasisOuter
-    setBasis b o = o{ opBasisOuter = b }
+    setBasis b o = o{ opBasisOuter = b, opCols = setBasis b`map`opCols o }
 
 instance Num Operator where
       negate        = opmap negate

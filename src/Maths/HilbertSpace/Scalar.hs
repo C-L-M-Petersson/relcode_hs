@@ -16,9 +16,10 @@ module Maths.HilbertSpace.Scalar
 
 ,   conj
 ) where
-import           System.IO.Unsafe
 
 import           Data.Complex
+import           Data.List
+import           Data.List.Split
 import           Data.List.Tools
 
 
@@ -61,11 +62,13 @@ instance Ord Scalar where
     s <=      s' = toReal s <=      toReal s'
 
 instance Read Scalar where
-    readsPrec _ str = [(readHead,strTail)]
+    readsPrec _ str         = [(readHead,strTail)]
         where
             readHead = Scalar . uncurry (:+) . read
-                     $ takeUntil (==')') str
-            strTail  = dropUntil (==')') str
+                     $ takeUntil (==')') str'
+            strTail  = dropUntil (==')') str'
+            str' = let replace from to = intercalate to . splitOn from
+                    in replace "NaN" "0" str
 
 instance Show Scalar where
     show (Scalar (r:+i)) = show (r,i)

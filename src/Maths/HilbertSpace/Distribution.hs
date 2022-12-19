@@ -24,7 +24,9 @@ class Distributed a where
     {-# INLINE normalise #-}
     norm  = sqrt  . norm2
     norm2 = (**2) . norm
-    normalise x = (1/norm x)`scale`x
+    normalise x
+        | norm x==0 = x
+        | otherwise = (1/norm x)`scale`x
 
     {-# INLINE setBasis #-}
     {-# INLINE modifyBasis #-}

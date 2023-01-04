@@ -61,14 +61,13 @@ getPureStatesByOnePhotonEnergy kappas0 ns0 kappas1 kappas2 eFinalIndex = do
     coherent1Ph <- getReadOption "coherent1Ph"
     coherent2Ph <- getReadOption "coherent2Ph"
 
-    let kappas1s = if coherent1Ph then [kappas1] else singleton`map`kappas1
-        kappas2s = if coherent2Ph then [kappas2] else singleton`map`kappas2
-
     sequence
         [ getPureStateByOnePhotonEnergy kappa0 n0 kappas1' kappas2' eFinalIndex
             | (kappa0,n0) <- zip kappas0 ns0
-            ,  kappas1'   <- kappas1s
-            ,  kappas2'   <- kappas2s
+            ,  kappas1'   <- if coherent1Ph then [kappas1]
+                                            else singleton`map`kappas1
+            ,  kappas2'   <- if coherent2Ph then [kappas2]
+                                            else singleton`map`kappas2
             ]
 
 getPureStateByOnePhotonEnergy :: QNum -> QNum -> [QNum] -> [QNum] -> Int

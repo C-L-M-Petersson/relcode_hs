@@ -91,6 +91,5 @@ cDictOptionSafe :: String -> CDict -> Maybe String
 cDictOptionSafe k = M.lookup k . cDictMap
 
 readOptionVal :: Read a => String -> String -> a
-readOptionVal k v = let mrv = readMay v in if isJust mrv
-    then fromJust mrv
-    else error $ "value "++v++" of option "++k++" can not be read"
+readOptionVal k v = let mrv = readMay v in fromMaybe
+    (error $ "value "++v++" of option "++k++" can not be read") mrv

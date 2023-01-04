@@ -5,6 +5,7 @@ import           Control.Monad
 import           Control.Monad.Extra
 
 import           Data.Composition
+import           Data.List
 
 import           Maths.HilbertSpace.DensityMatrix
 import           Maths.HilbertSpace.Distribution
@@ -60,8 +61,8 @@ getPureStatesByOnePhotonEnergy kappas0 ns0 kappas1 kappas2 eFinalIndex = do
     coherent1Ph <- getReadOption "coherent1Ph"
     coherent2Ph <- getReadOption "coherent2Ph"
 
-    let kappas1s = if coherent1Ph then [kappas1] else ((:[])`map`kappas1)
-        kappas2s = if coherent2Ph then [kappas2] else ((:[])`map`kappas2)
+    let kappas1s = if coherent1Ph then [kappas1] else singleton`map`kappas1
+        kappas2s = if coherent2Ph then [kappas2] else singleton`map`kappas2
 
     sequence
         [ getPureStateByOnePhotonEnergy kappa0 n0 kappas1' kappas2' eFinalIndex

@@ -1,5 +1,4 @@
 module QState.Output where
-import QState.Units.Internal
 
 import           Control.Lens ((??))
 import           Control.Monad
@@ -10,6 +9,7 @@ import           Maths.HilbertSpace.Distribution
 
 import           QState
 import           QState.FilePath
+import           QState.Units.Internal
 
 
 
@@ -32,5 +32,5 @@ printQStateFile str = putStrQStateFile str . show
 
 printEnergyDistributionQStateFile :: (Distributed a,Show a) => String -> a
                                                                     -> QState()
-printEnergyDistributionQStateFile str k = printQStateFile str=<<
-    (`modifyBasisElems`k) . to<$>getEnergyUnit
+printEnergyDistributionQStateFile str k = getEnergyUnit>>=
+    printQStateFile str . (`modifyBasisElems`k) . to

@@ -4,6 +4,7 @@ import           Control.Monad
 import           Control.Monad.Extra
 
 import           Data.Composition
+import           Data.List
 
 import           Maths.HilbertSpace.DensityMatrix
 import           Maths.HilbertSpace.Ket
@@ -46,12 +47,14 @@ getPureStateSum = (sum<$>) .:. getPureStates
 
 getPureStates :: [QNum] -> [QNum] -> [QNum] -> QState [Ket]
 getPureStates kappas0 ns0 kappas1 = do
-    kappas1s <- ifM (getReadOption "coherent1Ph") (return [kappas1])
-                                                  (return $ map(:[]) kappas1)
+    coherent1Ph <- getReadOption "coherent1Ph"
+
     sequence
-        [ getPureState kappa0 n0 kappas1' | (kappa0,n0) <- zip kappas0 ns0
-                                          ,  kappas1'   <- kappas1s
-                                          ]
+        [ getPureState kappa0 n0 kappas1'
+            | (kappa0,n0) <- zip kappas0 ns0
+            ,  kappas1'   <- if coherent1Ph then [kappas1]
+                                            else singleton`map`kappas1
+            ]
 
 getPureState :: QNum -> QNum -> [QNum] -> QState Ket
 getPureState kappa0 n0 kappas1 = energyKetToEkinGrid

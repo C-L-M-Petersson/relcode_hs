@@ -45,8 +45,13 @@ getPureStateSum :: [QNum] -> [QNum] -> [QNum] -> QState Ket
 getPureStateSum = (sum<$>) .:. getPureStates
 
 getPureStates :: [QNum] -> [QNum] -> [QNum] -> QState [Ket]
-getPureStates kappas0 ns0 kappas1 = zipWithM
-    (curry (flip (uncurry getPureState) kappas1)) kappas0 ns0
+getPureStates kappas0 ns0 kappas1 = do
+    kappas1s <- ifM (getReadOption "coherent1Ph") (return [kappas1])
+                                                  (return $ map(:[]) kappas1)
+    sequence
+        [ getPureState kappa0 n0 kappas1' | (kappa0,n0) <- zip kappas0 ns0
+                                          ,  kappas1'   <- kappas1s
+                                          ]
 
 getPureState :: QNum -> QNum -> [QNum] -> QState Ket
 getPureState kappa0 n0 kappas1 = energyKetToEkinGrid

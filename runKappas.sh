@@ -12,7 +12,9 @@ OUTIMAGEDIRBASE=outImage/run$RUN/
 run1ph()
 {
     echo "Treating 1ph: $1 -> $2"
-    ./run.x --runKRAKEN2ph False --kappas0 [$1] --kappas1 [$2]
+    ./run.x --runKRAKEN1ph True  --runKRAKEN2ph False \
+            --coherent1Ph  False --coherent2Ph  True  \
+            --kappas0 [$1] --kappas1 [$2]
 
     OUTFILEDIR="$OUTFILEDIRBASE"rho1ph.OMEGA0=$OMEGA0.FWHM=$FWHM/
     OUTIMAGEDIR="$OUTIMAGEDIRBASE"rho1ph.OMEGA0=$OMEGA0.FWHM=$FWHM/
@@ -36,7 +38,9 @@ run1ph()
 run2ph()
 {
     echo "Treating 2ph: $1 -> $2 -> $3"
-    ./run.x --runKRAKEN1ph False --kappas0 [$1] --kappas1 [$2] --kappas2 [$3]
+    ./run.x --runKRAKEN1ph False --runKRAKEN2ph True  \
+            --coherent1Ph  True  --coherent2Ph  False \
+            --kappas0 [$1] --kappas1 [$2] --kappas2 [$3]
 
     OUTFILEDIR="$OUTFILEDIRBASE"rho2ph.OMEGA0=$OMEGA0.FWHM=$FWHM.eFinalIndex=$EFINALINDEX/
     OUTIMAGEDIR="$OUTIMAGEDIRBASE"rho2ph.OMEGA0=$OMEGA0.FWHM=$FWHM.eFinalIndex=$EFINALINDEX/
@@ -135,9 +139,9 @@ run2ph -2 -1,-3     -2
 run2ph -2 -1,-3     1,-2
 run2ph -2 -1,-3     1,-3
 run2ph -2 -1,-3     1,4
-run2ph -2 -1,-3     2,-3
-run2ph -2 -1,-3     2,4
-run2ph -2 -1,-3     -3,4
+run2ph -2 -1,-3     -2,3
+run2ph -2 -1,-3     -2,-4
+run2ph -2 -1,-3     3,-4
 run2ph -2 -1,-3     1,-2,3
 run2ph -2 -1,-3     1,-2,-4
 run2ph -2 -1,-3     1,3,-4
@@ -203,11 +207,11 @@ run2ph 1,-2 -1,-3   -2
 #run2ph 1,-2 -1,-3   3
 #run2ph 1,-2 -1,-3   -4
 run2ph 1,-2 -1,-3   1,-2
-run2ph 1,-2 -1,-3   1,-3
-run2ph 1,-2 -1,-3   1,4
-run2ph 1,-2 -1,-3   2,-3
-run2ph 1,-2 -1,-3   2,4
-run2ph 1,-2 -1,-3   -3,4
+run2ph 1,-2 -1,-3   1,3
+run2ph 1,-2 -1,-3   1,-4
+run2ph 1,-2 -1,-3   -2,3
+run2ph 1,-2 -1,-3   -2,-4
+run2ph 1,-2 -1,-3   3,-4
 run2ph 1,-2 -1,-3   1,-2,3
 run2ph 1,-2 -1,-3   1,-2,-4
 run2ph 1,-2 -1,-3   1,3,-4

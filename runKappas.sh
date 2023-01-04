@@ -23,7 +23,14 @@ run1ph()
 
     mkdir -p $OUTIMAGEDIR
 
-    gnuplot -e "inFileRho='$OUTFILERHO'" -e "inFilePsi='$OUTFILEPSI'" -e "outFile='$OUTIMAGE'" -e "emin='$EMIN'" -e "emax='$EMAX'" -e "ebordershift='0'" -e "fromKappas='$1'" -e "toKappas='$2'" gpFiles/plot1D.gp
+    gnuplot -e "inFileRho='$OUTFILERHO'" \
+            -e "inFilePsi='$OUTFILEPSI'" \
+            -e "outFile='$OUTIMAGE'"     \
+            -e "emin='$EMIN'"            \
+            -e "emax='$EMAX'"            \
+            -e "ebordershift='0'"        \
+            -e "fromKappas='$1'"         \
+            -e "toKappas='$2'" gpFiles/plot1ph.gp
 }
 
 run2ph()
@@ -40,7 +47,15 @@ run2ph()
 
     mkdir -p $OUTIMAGEDIR
 
-     gnuplot -e "inFileRho='$OUTFILERHO'" -e "inFilePsi='$OUTFILEPSI'" -e "outFile='$OUTIMAGE'" -e "emin='$EMIN'" -e "emax='$EMAX'" -e "ebordershift='0'" -e "fromKappas='$1'" -e "byKappas='$2'" -e "toKappas='$3'" gpFiles/plot2D.gp
+     gnuplot -e "inFileRho='$OUTFILERHO'" \
+             -e "inFilePsi='$OUTFILEPSI'" \
+             -e "outFile='$OUTIMAGE'"     \
+             -e "emin='$EMIN'"            \
+             -e "emax='$EMAX'"            \
+             -e "ebordershift='0'"        \
+             -e "fromKappas='$1'"         \
+             -e "byKappas='$2'"           \
+             -e "toKappas='$3'" gpFiles/plot2ph.gp
 }
 
 run1ph 1    -1

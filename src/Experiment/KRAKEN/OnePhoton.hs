@@ -12,6 +12,7 @@ import           Maths.HilbertSpace.Operator
 import           Maths.QuantumNumbers
 
 import           QState
+import           QState.Coherence
 import           QState.Configure
 import           QState.Energy
 import           QState.OnePhoton
@@ -47,13 +48,12 @@ getPureStateSum = (sum<$>) .:. getPureStates
 
 getPureStates :: [QNum] -> [QNum] -> [QNum] -> QState [Ket]
 getPureStates kappas0 ns0 kappas1 = do
-    coherent1Ph <- getReadOption "coherent1Ph"
+    groupedKappas1 <- groupOnePhotonKappasByCoherence kappas1
 
     sequence
         [ getPureState kappa0 n0 kappas1'
             | (kappa0,n0) <- zip kappas0 ns0
-            ,  kappas1'   <- if coherent1Ph then [kappas1]
-                                            else singleton`map`kappas1
+            ,  kappas1'   <- groupedKappas1
             ]
 
 getPureState :: QNum -> QNum -> [QNum] -> QState Ket

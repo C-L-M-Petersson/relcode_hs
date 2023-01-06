@@ -1,0 +1,34 @@
+module QState.Coherence.Internal where
+
+import           Data.List
+
+import           Maths.QuantumNumbers
+
+import           QState.Configure.Internal
+
+
+data Coherence = All | None | Angular deriving(Read,Show)
+
+addKappasCoherently :: Coherence -> QNum -> QNum -> Bool
+addKappasCoherently All     _ _  = True
+addKappasCoherently None    k k' = k==k'
+addKappasCoherently Angular k k' = signum k==signum k'
+
+
+coherent :: Int -> CDict -> Coherence
+coherent nPh = cDictReadOption ("coherent"++show nPh++"ph")
+
+coherent1ph :: CDict -> Coherence
+coherent1ph = coherent 1
+
+coherent2ph :: CDict -> Coherence
+coherent2ph = coherent 2
+
+
+kappasByCoherence :: Coherence -> [QNum] -> [[QNum]]
+kappasByCoherence c = groupRec (addKappasCoherently c)
+    where
+        groupRec :: (QNum -> QNum -> Bool) -> [QNum] -> [[QNum]]
+        groupRec cTest    []  = []
+        groupRec cTest (k:ks) = let (cKs,icKs) = partition (cTest k) ks
+                                 in (k:cKs) : groupRec cTest icKs

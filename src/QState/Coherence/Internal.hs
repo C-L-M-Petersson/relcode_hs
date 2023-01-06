@@ -7,12 +7,13 @@ import           Maths.QuantumNumbers
 import           QState.Configure.Internal
 
 
-data Coherence = All | None | Angular deriving(Read,Show)
+data Coherence = All | None | Angular | Spin deriving(Read,Show)
 
 addKappasCoherently :: Coherence -> QNum -> QNum -> Bool
 addKappasCoherently All     _ _  = True
-addKappasCoherently None    k k' = k==k'
-addKappasCoherently Angular k k' = signum k==signum k'
+addKappasCoherently None    k k' =        k==k'
+addKappasCoherently Angular k k' =     -1-k==k'
+addKappasCoherently Spin    k k' = signum k==signum k'
 
 
 coherent :: Int -> CDict -> Coherence
@@ -29,6 +30,6 @@ kappasByCoherence :: Coherence -> [QNum] -> [[QNum]]
 kappasByCoherence c = groupRec (addKappasCoherently c)
     where
         groupRec :: (QNum -> QNum -> Bool) -> [QNum] -> [[QNum]]
-        groupRec cTest    []  = []
         groupRec cTest (k:ks) = let (cKs,icKs) = partition (cTest k) ks
                                  in (k:cKs) : groupRec cTest icKs
+        groupRec _      _     = []

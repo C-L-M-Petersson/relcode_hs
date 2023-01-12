@@ -7,6 +7,7 @@ module QState
 ,   withCDict
 ,   withCDictM
 
+,   getUnit
 ,   getEnergyUnit
 ,   getTimeUnit
 
@@ -22,6 +23,7 @@ import           Maths.QuantumNumbers
 import           QState.Configure.Internal
 import           QState.Internal
 import           QState.Units.Energy
+import           QState.Units.Internal
 import           QState.Units.Time
 
 
@@ -37,6 +39,10 @@ withCDictM :: (CDict -> IO a) -> QState a
 withCDictM x = liftIO . x=<<getCDict
 
 
+
+getUnit :: UnitType -> QState GenericUnit
+getUnit Energy = toGeneric<$>getEnergyUnit
+getUnit Time   = toGeneric<$>getTimeUnit
 
 getEnergyUnit :: QState EnergyUnit
 getEnergyUnit = gets eUnit

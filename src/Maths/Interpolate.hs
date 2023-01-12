@@ -24,7 +24,7 @@ interpolateKet xs k
     | isNothing(basis k) = error "cannot interpolate ket without basis"
     | otherwise          = let newElems = interpolateList fromReal xs
                                             (fromJust $ basis k) (ketElems k)
-                            in Ket (Just xs) newElems
+                            in Ket (ketBasisUnit k) (Just xs) newElems
 
 
 

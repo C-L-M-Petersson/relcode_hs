@@ -5,6 +5,7 @@ import           Maths.HilbertSpace.Scalar
 
 import           QState.Configure.Internal
 import           QState.Units
+import           QState.Units.Internal
 
 
 type Pulse = Double -> Double
@@ -25,7 +26,8 @@ xuv eu cDict omega
                                             /fwhm eu cDict**2 )
 
 xuvKet :: [Double] -> EnergyUnit -> CDict -> Ket
-xuvKet os eu cDict = Ket (Just os) ((fromReal . xuv eu cDict)`map`os)
+xuvKet os eu cDict = Ket (Just Energy) (Just os)
+                         ((fromReal . xuv eu cDict)`map`os)
 
 
 

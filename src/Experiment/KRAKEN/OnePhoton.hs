@@ -26,14 +26,14 @@ kraken1ph = whenRunKraken1ph . join $ kraken1phForQNums
 kraken1phForQNums :: [QNum] -> [QNum] -> [QNum] -> QState()
 kraken1phForQNums kappas0 ns0 kappas1 = whenRunKraken1ph $
     getDensityMatrix kappas0 ns0 kappas1
-        >>=forM_ [ saveData printEnergyDistributionQStateFile "Rho1ph"
-                 , saveData printQStateFile "Purity1ph"      . purity
-                 , saveData printQStateFile "Concurrence1ph" . concurrence
+        >>=forM_ [ ifSaveData printQStateFileWithUnits "Rho1ph"
+                 , ifSaveData printQStateFile "Purity1ph"      . purity
+                 , ifSaveData printQStateFile "Concurrence1ph" . concurrence
                  ] . flip ($)
         >>getPureStateSum kappas0 ns0 kappas1
-                >>=saveData printEnergyDistributionQStateFile "Psi1ph"
-    where saveData print key val = whenM (getReadOption ("save"++key))
-                                 $ print ("outFile"++key) val
+                >>=ifSaveData printQStateFileWithUnits "Psi1ph"
+    where ifSaveData print key val = whenM (getReadOption ("save"++key))
+                                   $ print ("outFile"++key) val
 
 whenRunKraken1ph :: QState() -> QState()
 whenRunKraken1ph = whenM (getReadOption "runKRAKEN1ph")

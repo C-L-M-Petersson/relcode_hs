@@ -9,6 +9,7 @@ import           Maths.Interpolate
 
 import           QState
 import           QState.Energy.Internal
+import           QState.Units.Internal
 
 
 getXUV :: QState Pulse
@@ -51,4 +52,4 @@ energyKetToEkinGrid k = (`interpolateKet`k)
 
 interpolatedExcitedState :: [Double] -> [Scalar] -> QState Ket
 interpolatedExcitedState es vs = (*)<$>getInterpolatedXUVKet
-                                    <*>interpolateEnergyKet (Ket (Just es) vs)
+                        <*>interpolateEnergyKet (Ket (Just Energy) (Just es) vs)

@@ -1,4 +1,6 @@
 module Maths.HilbertSpace.Operator where
+import QState.Units.Energy
+import System.IO.Unsafe
 
 import           Data.Composition
 import           Data.List
@@ -10,9 +12,13 @@ import           Maths.HilbertSpace.Scalar
 
 import           Safe
 
+import           QState
+import           QState.Units
 
-data Operator = Operator { opBasisOuter :: Maybe [Double]
-                         , opCols       :: [Ket]
+
+data Operator = Operator { opBasisUnitOuter :: Maybe UnitType
+                         , opBasisOuter     :: Maybe [Double]
+                         , opCols           :: [Ket]
                          }
 
 instance Distributed Operator where
@@ -21,19 +27,32 @@ instance Distributed Operator where
     basis        = opBasisOuter
     setBasis b o = o{ opBasisOuter = b, opCols = setBasis b`map`opCols o }
 
+instance HasUnit Operator where
+    unitType = opBasisUnitOuter
+    toUnits   (Operator mUT mBO cs) = Operator mUT<$>mBO'<*>mapM toUnits   cs
+        where mBO' = case (mUT,mBO) of
+                -- _                 -> getEnergyUnit (fromJust mUT)>>=error . show
+                (Just ut,Just bo) -> Just . (`map`bo) . to  <$>return EV
+                _                 -> return mBO
+    fromUnits (Operator mUT mBO cs) = Operator mUT<$>mBO'<*>mapM fromUnits cs
+        where mBO' = case (mUT,mBO) of
+                (Just ut,Just bo) -> Just . (`map`bo) . from<$>getUnit ut
+                _                 -> return mBO
+
 instance Num Operator where
       negate        = opmap negate
       (+)           = liftOp2 (+)
       (*)           = (|><|><|)
-      fromInteger i = Operator Nothing $ map ((*fromInteger i) . ithKet) [0..]
+      fromInteger i = Operator Nothing Nothing
+                    $ map ((*fromInteger i) . ithKet) [0..]
       abs           = opmap abs
       signum        = opmap signum
 
 instance Show Operator where
-    show (Operator  Nothing  es)        = error "showing operator without basis"
-    show (Operator (Just bO) es)
+    show (Operator _  Nothing  es)      = error "showing operator without basis"
+    show (Operator _ (Just bo) es)
         | any (isNothing . ketBasis) es = error "showing operator without basis"
-        | otherwise                     = unlines $ zipWith showCol bO es
+        | otherwise                     = unlines $ zipWith showCol bo es
         where
             showCol :: Double -> Ket -> String
             showCol x = unlines . map ((show x++" ")++) . lines . show
@@ -41,7 +60,8 @@ instance Show Operator where
 
 
 opRows :: Operator -> [Ket]
-opRows op = map (Ket (opBasisOuter op)) . transpose . map ketElems $ opCols op
+opRows op = map (Ket (opBasisUnitOuter op) (opBasisOuter op))
+                                        . transpose . map ketElems $ opCols op
 
 
 
@@ -49,8 +69,9 @@ opmap :: (Ket -> Ket) -> Operator -> Operator
 opmap f o = o{ opCols = f`map`opCols o }
 
 liftOp2 :: (Ket -> Ket -> Ket) -> Operator -> Operator -> Operator
-liftOp2 f (Operator bO es) (Operator bO' es') = Operator
-                                                (headMay $ catMaybes [bO,bO'])
+liftOp2 f (Operator mUT mBO es) (Operator mUT' mBO' es') = Operator
+                                                (headMay $ catMaybes [mUT,mUT'])
+                                                (headMay $ catMaybes [mBO,mBO'])
                                                 (zipWith f es es')
 
 
@@ -63,17 +84,20 @@ o|><|>k  = timesDelta . sum $ zipWith (.|>) (ketElems k) (opCols o)
 
 (|><|) :: Ket -> Ket -> Operator
 k|><|k' = Operator
-          { opBasisOuter = ketBasis k'
-          , opCols       = (.|>k)`map`ketElems((<|)k')
+          { opBasisUnitOuter = ketBasisUnit k'
+          , opBasisOuter     = ketBasis k'
+          , opCols           = (.|>k)`map`ketElems((<|)k')
           }
 
 (|><|><|) :: Operator -> Operator -> Operator
-o|><|><|o' = let b = fromJust $ opBasisOuter o'
-              in timesDelta $ Operator (Just b) (getCol`map`[0..length b-1])
+o|><|><|o' = let mut =            opBasisUnitOuter o'
+                 b   = fromJust $ opBasisOuter     o'
+              in timesDelta $ Operator mut (Just b) (getCol`map`[0..length b-1])
     where
         getCol :: Int -> Ket
-        getCol c = let b = fromJust $ opBasisOuter o
-                    in Ket (Just b) ((`getElem`c)`map`[0..length b-1])
+        getCol c = let mut =            opBasisUnitOuter o
+                       b   = fromJust $ opBasisOuter o
+                    in Ket mut (Just b) ((`getElem`c)`map`[0..length b-1])
 
         getElem :: Int -> Int -> Scalar
         getElem r c = sum $ zipWith (*) (map ketElems (opRows o )!!r)
@@ -90,3 +114,15 @@ diag = diagRec 0 . map ketElems . opCols
         diagRec :: Int -> [[Scalar]] -> [Scalar]
         diagRec i (xs:xss) = xs!!i : diagRec (i+1) xss
         diagRec _  _       = []
+
+offDiag :: Operator -> Int -> [Scalar]
+offDiag o c
+    | c==0 = diag o
+    | c> 0 = offDiagRec 0 . map ketElems . drop c   $ opCols o
+    | c< 0 = offDiagRec 0 . map (drop c . ketElems) $ opCols o
+    where
+        offDiagRec :: Int -> [[Scalar]] -> [Scalar]
+        offDiagRec i (xs:xss)
+            | i>=length xs    = []
+            | otherwise       = xs!!i : offDiagRec (i+1) xss
+        offDiagRec _  _       = []

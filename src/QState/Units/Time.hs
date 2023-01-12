@@ -5,6 +5,16 @@ import           QState.Units.Internal
 
 data TimeUnit = AU | S | MS | US | NS | PS | FS | AS
 
+instance Show TimeUnit where
+    show AU = "au"
+    show S  = "s"
+    show MS = "ms"
+    show US = "µs"
+    show NS = "ns"
+    show PS = "ps"
+    show FS = "fs"
+    show AS = "as"
+
 instance Read TimeUnit where
     readsPrec _ ('a':'u':str) = [(AU,str)]
     readsPrec _ (    's':str) = [(S ,str)]

@@ -32,15 +32,15 @@ kraken2phForQNums :: [QNum] -> [QNum] -> [QNum] -> [QNum] -> Int -> QState()
 kraken2phForQNums kappas0 ns0 kappas1 kappas2 eFinalIndex = whenRunKraken2ph $
     getReconstructedOnePhotonDensityMatrix kappas0 ns0
                                             kappas1 kappas2 eFinalIndex
-        >>=forM_ [ saveData printEnergyDistributionQStateFile "Rho2ph"
-                 , saveData printQStateFile "Purity2ph"      . purity
-                 , saveData printQStateFile "Concurrence2ph" . concurrence
+        >>=forM_ [ ifSaveData printQStateFileWithUnits "Rho2ph"
+                 , ifSaveData printQStateFile "Purity2ph"      . purity
+                 , ifSaveData printQStateFile "Concurrence2ph" . concurrence
                  ] . flip ($)
         >>getPureStateSumByOnePhotonEnergy kappas0 ns0
                                             kappas1 kappas2 eFinalIndex
-            >>=saveData printEnergyDistributionQStateFile "Psi2ph"
-    where saveData print key val = whenM (getReadOption ("save"++key))
-                                 $ print ("outFile"++key) val
+            >>=ifSaveData printQStateFileWithUnits "Psi2ph"
+    where ifSaveData print key val = whenM (getReadOption ("save"++key))
+                                   $ print ("outFile"++key) val
 
 whenRunKraken2ph :: QState() -> QState()
 whenRunKraken2ph = whenM (getReadOption "runKRAKEN2ph")

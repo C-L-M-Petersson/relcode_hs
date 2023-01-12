@@ -10,9 +10,13 @@ import           Maths.HilbertSpace.Scalar
 
 import           Safe
 
+import           QState
+import           QState.Units
 
-data Ket = Ket { ketBasis :: Maybe [Double]
-               , ketElems :: [Scalar]
+
+data Ket = Ket { ketBasisUnit :: Maybe UnitType
+               , ketBasis     :: Maybe [Double]
+               , ketElems     :: [Scalar]
                }
 
 instance Distributed Ket where
@@ -21,26 +25,36 @@ instance Distributed Ket where
     basis        = ketBasis
     setBasis b k = k{ ketBasis = b }
 
+instance HasUnit Ket where
+    unitType = ketBasisUnit
+    toUnits (Ket (Just ut) (Just b) es)   = flip (Ket (Just ut)) es
+                                          . Just . (`map`b) . to  <$>getUnit ut
+    toUnits  k                            = return k
+    fromUnits (Ket (Just ut) (Just b) es) = flip (Ket (Just ut)) es
+                                          . Just . (`map`b) . from<$>getUnit ut
+    fromUnits  k                          = return k
+
 instance Num Ket where
       negate      = kmap negate
       (+)         = liftKet2 (+)
       (*)         = liftKet2 (*)
-      fromInteger = Ket Nothing . repeat . fromInteger
+      fromInteger = Ket Nothing Nothing . repeat . fromInteger
       abs         = kmap abs
       signum      = kmap signum
 
 instance Show Ket where
-    show (Ket Nothing  es) = ("|"++) . (++">") . intercalate "," $ map show es
-    show (Ket (Just b) es) = unlines $ zipWith showElem b es
+    show (Ket Nothing   Nothing  es) = ("|"++) . (++">") . intercalate ","
+                                     $ map show es
+    show (Ket _         (Just b) es) = unlines $ zipWith showElem b es
         where showElem b e = unwords $ map show [b,absVal e,phase e]
 
 
 
 ket :: [Scalar] -> Ket
-ket = Ket Nothing
+ket = Ket Nothing Nothing
 
 ithKet :: Int -> Ket
-ithKet i = Ket Nothing (replicate i 0++[1]++repeat 0)
+ithKet i = Ket Nothing Nothing (replicate i 0++[1]++repeat 0)
 
 
 
@@ -48,8 +62,9 @@ kmap :: (Scalar -> Scalar) -> Ket -> Ket
 kmap f k = k{ ketElems = f`map`ketElems k }
 
 liftKet2 :: (Scalar -> Scalar -> Scalar) -> Ket -> Ket -> Ket
-liftKet2 f (Ket mb es) (Ket mb' es') = Ket (headMay $ catMaybes [mb,mb'])
-                                           (zipWith f es es')
+liftKet2 f (Ket uT mB es) (Ket uT' mB' es') = Ket (headMay $ catMaybes [uT,uT'])
+                                                  (headMay $ catMaybes [mB,mB'])
+                                                  (zipWith f es es')
 
 
 

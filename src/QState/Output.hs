@@ -9,7 +9,7 @@ import           Maths.HilbertSpace.Distribution
 
 import           QState
 import           QState.FilePath
-import           QState.Units.Internal
+import           QState.Units
 
 
 
@@ -23,14 +23,12 @@ putStrLnQState :: String -> QState()
 putStrLnQState = liftIO . putStrLn
 
 
-putStrQStateFile :: String -> String -> QState()
-putStrQStateFile str x = createParentDir str
-                       >>join (liftIO.:writeFile<$>getCDictFilePath str??x)
+putStrQStateFile :: FilePath -> String -> QState()
+putStrQStateFile fp x = createParentDir fp
+                      >>join (liftIO.:writeFile<$>getCDictFilePath fp??x)
 
-printQStateFile :: Show a => String -> a -> QState()
-printQStateFile str = putStrQStateFile str . show
+printQStateFile :: Show a => FilePath -> a -> QState()
+printQStateFile fp = putStrQStateFile fp . show
 
-printEnergyDistributionQStateFile :: (Distributed a,Show a) => String -> a
-                                                                    -> QState()
-printEnergyDistributionQStateFile str k = getEnergyUnit>>=
-    printQStateFile str . (`modifyBasisElems`k) . to
+printQStateFileWithUnits :: (HasUnit a,Show a) => FilePath -> a -> QState()
+printQStateFileWithUnits fp x = toUnits x>>=printQStateFile fp

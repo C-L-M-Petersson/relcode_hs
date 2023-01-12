@@ -1,26 +1,22 @@
 module QState.Units
-(   from
+(   EnergyUnit
+,   TimeUnit
+,   UnitType
 ,   to
+,   from
 
-,   EnergyUnit
-,   toEnergyUnit
-,   fromEnergyUnit
+,   HasUnit
+,   unitType
+,   toUnits
+,   fromUnits
 ) where
 
 import           QState
 import           QState.Units.Energy
 import           QState.Units.Internal
+import           QState.Units.Time
 
-
-toEnergyUnit   :: (Floating a,Fractional a) => a -> QState a
-toEnergyUnit   x = (`to`  x)<$>getEnergyUnit
-
-fromEnergyUnit :: (Floating a,Fractional a) => a -> QState a
-fromEnergyUnit x = (`from`x)<$>getEnergyUnit
-
-
-toTimeUnit   :: (Floating a,Fractional a) => a -> QState a
-toTimeUnit   x = (`to`  x)<$>getTimeUnit
-
-fromTimeUnit :: (Floating a,Fractional a) => a -> QState a
-fromTimeUnit x = (`from`x)<$>getTimeUnit
+class HasUnit a where
+    unitType :: a -> Maybe UnitType
+    toUnits   :: a -> QState a
+    fromUnits :: a -> QState a

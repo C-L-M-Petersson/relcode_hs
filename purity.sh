@@ -32,7 +32,7 @@ do
             --outFilePurity2ph      $PURITY2PHFILE      \
             --outFileConcurrence1ph $CONCURRENCE1PHFILE \
             --outFileConcurrence2ph $CONCURRENCE2PHFILE \
-            --coherent1ph           Spin
+            --coherent1ph           None
     ./run.x --fwhm                  $FWHM               \
             --runKRAKEN1ph          False               \
             --runKRAKEN2ph          True                \
@@ -45,7 +45,7 @@ do
             --outFileConcurrence1ph $CONCURRENCE1PHFILE \
             --outFileConcurrence2ph $CONCURRENCE2PHFILE \
             --coherent1ph           All                 \
-            --coherent2ph           Spin
+            --coherent2ph           None
 
     echo -n "$FWHM " >> "$OUTFILEDIR"all.res
     paste "$OUTFILEDIR"purity1ph.FWHM=$FWHM.res      \

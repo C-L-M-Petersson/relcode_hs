@@ -13,7 +13,7 @@ run1ph()
 {
     echo "Treating 1ph: $1 -> $2"
     ./run.x --runKRAKEN1ph True  --runKRAKEN2ph False \
-            --coherent1ph  Spin                       \
+            --coherent1ph  None                       \
             --kappas0 [$1] --kappas1 [$2]
 
     OUTFILEDIR="$OUTFILEDIRBASE"rho1ph.OMEGA0=$OMEGA0.FWHM=$FWHM/
@@ -39,7 +39,7 @@ run2ph()
 {
     echo "Treating 2ph: $1 -> $2 -> $3"
     ./run.x --runKRAKEN1ph False --runKRAKEN2ph True    \
-            --coherent1ph  All   --coherent2ph  Spin    \
+            --coherent1ph  All   --coherent2ph  None    \
             --kappas0 [$1] --kappas1 [$2] --kappas2 [$3]
 
     OUTFILEDIR="$OUTFILEDIRBASE"rho2ph.OMEGA0=$OMEGA0.FWHM=$FWHM.eFinalIndex=$EFINALINDEX/

@@ -4,19 +4,19 @@ import           QState.Configure.Internal
 
 
 class Unit a where
-    to   :: Fractional b => a -> b -> b
-    from :: Fractional b => a -> b -> b
+    {-# MINIMAL (toUnitFactor | fromUnitFactor) #-}
+    toUnitFactor :: (Floating b,Fractional b) => a -> b
+    fromUnitFactor :: (Floating b,Fractional b) => a -> b
+
+    {-# INLINE toUnitFactor   #-}
+    {-# INLINE fromUnitFactor #-}
+    toUnitFactor   u = 1/fromUnitFactor u
+    fromUnitFactor u = 1/  toUnitFactor u
 
 
 
-data EnergyUnit = AU | EV
+to :: (Unit a,Floating b,Fractional b) => a -> b -> b
+to u = (toUnitFactor u*)
 
-instance Read EnergyUnit where
-    readsPrec _ "au" = [(AU,"")]
-    readsPrec _ "eV" = [(EV,"")]
-
-instance Unit EnergyUnit where
-    to   AU = id
-    to   EV = (*27.211396641308)
-    from AU = id
-    from EV = (*0.0367493081366)
+from :: (Unit a,Floating b,Fractional b) => a -> b -> b
+from u = (fromUnitFactor u*)

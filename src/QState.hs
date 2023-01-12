@@ -8,6 +8,7 @@ module QState
 ,   withCDictM
 
 ,   getEnergyUnit
+,   getTimeUnit
 
 ,   getOmegasXUV
 ) where
@@ -20,7 +21,8 @@ import           Maths.QuantumNumbers
 
 import           QState.Configure.Internal
 import           QState.Internal
-import           QState.Units.Internal
+import           QState.Units.Energy
+import           QState.Units.Time
 
 
 type QState a = StateT System IO a
@@ -38,6 +40,9 @@ withCDictM x = liftIO . x=<<getCDict
 
 getEnergyUnit :: QState EnergyUnit
 getEnergyUnit = gets eUnit
+
+getTimeUnit :: QState TimeUnit
+getTimeUnit = gets tUnit
 
 
 

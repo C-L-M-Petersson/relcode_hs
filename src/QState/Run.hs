@@ -24,7 +24,8 @@ initialiseQState = do
 
     return System
            { cDict     = cDict
-           , eUnit     = cDictReadOption "units" cDict
+           , eUnit     = cDictReadOption "energyUnits" cDict
+           , tUnit     = cDictReadOption "timeUnits"   cDict
 
            , twoPhoton = "second_photon"`elem`runDirFiles
 

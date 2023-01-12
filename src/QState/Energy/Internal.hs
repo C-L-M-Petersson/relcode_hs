@@ -4,7 +4,7 @@ import           Maths.HilbertSpace.Ket
 import           Maths.HilbertSpace.Scalar
 
 import           QState.Configure.Internal
-import           QState.Units.Internal
+import           QState.Units
 
 
 type Pulse = Double -> Double
@@ -19,7 +19,10 @@ fwhm   eu cDict = eu`from`cDictReadOption "fwhm"   cDict
 
 
 xuv :: EnergyUnit -> CDict -> Pulse
-xuv eu cDict omega = exp( -4*log 2*(omega-omega0 eu cDict)**2/fwhm eu cDict**2 )
+xuv eu cDict omega
+    | omega0 eu cDict==0 = 1
+    | otherwise          = exp( -4*log 2*(omega-omega0 eu cDict)**2
+                                            /fwhm eu cDict**2 )
 
 xuvKet :: [Double] -> EnergyUnit -> CDict -> Ket
 xuvKet os eu cDict = Ket (Just os) ((fromReal . xuv eu cDict)`map`os)

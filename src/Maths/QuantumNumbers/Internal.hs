@@ -1,5 +1,7 @@
 module Maths.QuantumNumbers.Internal where
 
+import           Maths.HilbertSpace.Scalar
+
 
 data QNum = QNum { base :: Int
                  , half :: Bool
@@ -13,7 +15,7 @@ instance Fractional QNum where
         | abs(r-floored-1/2)<lim = QNum (floor r) True
         | otherwise              = errNonHalfInteger
         where
-            floored = fromInteger (round r)
+            floored = fromInteger(floor r)
             lim     = 1e-3
 
 instance Num QNum where
@@ -73,6 +75,9 @@ intFromQNum  q                = error
 doubleFromQNum :: QNum -> Double
 doubleFromQNum (QNum base True ) = fromIntegral base+0.5
 doubleFromQNum (QNum base False) = fromIntegral base
+
+scalarFromQNum :: QNum -> Scalar
+scalarFromQNum = fromReal . doubleFromQNum
 
 
 

@@ -61,18 +61,23 @@ getPureStatesByOnePhotonEnergy :: [QNum] -> [QNum] -> [QNum] -> [QNum] -> Int
 getPureStatesByOnePhotonEnergy kappas0 ns0 kappas1 kappas2 eFinalIndex = do
     groupedKappas1 <- groupOnePhotonKappasByCoherence kappas1
     groupedKappas2 <- groupTwoPhotonKappasByCoherence kappas2
+    let mJs = let j = minimum $ map (maximum . map jFromKappa)
+                                    [kappas0,kappas1,kappas2]
+               in mValues j
 
-    sequence
-        [ getPureStateByOnePhotonEnergy kappa0 n0 kappas1' kappas2' eFinalIndex
-            | (kappa0,n0) <- zip kappas0 ns0
-            ,  kappas1'   <- groupedKappas1
-            ,  kappas2'   <- groupedKappas2
-            ]
+    sequence [ getPureStateByOnePhotonEnergy kappa0 n0 kappas1' kappas2' [mJ]
+                                                                     eFinalIndex
+                | (kappa0,n0) <- zip kappas0 ns0
+                ,  kappas1'   <- groupedKappas1
+                ,  kappas2'   <- groupedKappas2
+                ,  mJ         <- mJs
+                ]
 
-getPureStateByOnePhotonEnergy :: QNum -> QNum -> [QNum] -> [QNum] -> Int
-                                                                -> QState Ket
-getPureStateByOnePhotonEnergy kappa0 n0 kappas1 kappas2 eFinalIndex =
+getPureStateByOnePhotonEnergy :: QNum -> QNum -> [QNum] -> [QNum] -> [QNum]
+                                                            -> Int -> QState Ket
+getPureStateByOnePhotonEnergy kappa0 n0 kappas1 kappas2 msJ eFinalIndex =
     join (interpolatedExcitedState<$>getOmegas kappa0 n0
                                   <*>getMElements [kappa0] [n0]
-                                                   kappas1 kappas2 eFinalIndex)
+                                                   kappas1 kappas2
+                                                   msJ eFinalIndex)
         >>=((shiftBasis<$>getHFEnergy kappa0 n0)??)>>=energyKetToEkinGrid

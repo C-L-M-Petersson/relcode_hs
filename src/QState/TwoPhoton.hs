@@ -20,12 +20,14 @@ getEnergyFin :: QNum -> QNum -> Int -> QState [Double]
 getEnergyFin = withCDictM.:.energyFin
 
 
-getMElement :: QNum -> QNum -> QNum -> QNum -> Int -> QState [Scalar]
-getMElement = withCDictM.::.mElement
+getMElement :: QNum -> QNum -> QNum -> QNum -> QNum -> Int -> QState [Scalar]
+getMElement = withCDictM.:::mElement
 
-getMElements :: [QNum] -> [QNum] -> [QNum] -> [QNum] -> Int -> QState [Scalar]
-getMElements kappas0 ns0 kappas1 kappas2 eFinalIndex = map sum . transpose<$>
-    sequence [ getMElement kappa0 n0 kappa1 kappa2 eFinalIndex
-                | (kappa0,n0) <- zip kappas0 ns0, kappa1 <- kappas1
-                                                , kappa2 <- kappas2
+getMElements :: [QNum] -> [QNum] -> [QNum] -> [QNum] ->  [QNum] -> Int
+                                                            -> QState [Scalar]
+getMElements kappas0 ns0 kappas1 kappas2 msJ eFinalIndex = map sum . transpose
+    <$>sequence [ getMElement kappa0 n0 kappa1 kappa2 mJ eFinalIndex
+                    | (kappa0,n0) <- zip kappas0 ns0, kappa1 <- kappas1
+                                                    , kappa2 <- kappas2
+                                                    , mJ     <- msJ
                                                 ]

@@ -11,6 +11,7 @@ import           Data.Maybe
 
 import           Maths.HilbertSpace
 import           Maths.QuantumNumbers
+import           Maths.WignerSymbol
 
 import           QState.Configure
 import           QState.Energy.Internal
@@ -63,13 +64,22 @@ energyFin kappa0 n0 = readFileColIndex
 
 
 
-mElement :: QNum -> QNum -> QNum -> QNum -> Int -> CDict -> IO [Scalar]
-mElement kappa0 n0 kappa1 kappa2 eFinalIndex = (filterLines<$>).readFileColKappa
-    ("m_elements_eF"++show eFinalIndex++"_"++show kappa0
-                                      ++"_"++show (nthKappaElevel kappa0 n0))
-        kappa0 kappa1 kappa2
+mElementPrimitive :: QNum -> QNum -> QNum -> QNum -> Int -> CDict -> IO [Scalar]
+mElementPrimitive kappa0 n0 kappa1 kappa2 eFinalIndex = (filterLines<$>)
+                        . readFileColKappa mElemFilePath kappa0 kappa1 kappa2
     where
         filterLines :: [a] -> [a]
         filterLines (x:xs) = everyFifth (x:x:xs)
             where everyFifth xs = case drop 4 xs of x:xs' -> x : everyFifth xs'
                                                     []    -> []
+
+        mElemFilePath = "m_elements_eF"++show eFinalIndex++"_"++show kappa0
+                                  ++"_"++show (nthKappaElevel kappa0 n0)
+
+mElement :: QNum -> QNum -> QNum -> QNum -> QNum -> Int -> CDict -> IO [Scalar]
+mElement kappa0 n0 kappa1 kappa2 mJ eFinalIndex cDict = map (*fact)
+        <$>mElementPrimitive kappa0 n0 kappa1 kappa2 eFinalIndex cDict
+    where
+        [j0,j1,j2] = map jFromKappa [kappa0,kappa1,kappa2]
+        fact = wigner3j j2 1 j1 (-mJ) 0 mJ * wigner3j j1 1 j0 (-mJ) 0 mJ
+             * (-1)**scalarFromQNum(j2+j1-2*mJ)

@@ -3,6 +3,7 @@ module Maths.QuantumNumbers
 
 ,   intFromQNum
 ,   doubleFromQNum
+,   scalarFromQNum
 
 ,   kappaFromJL
 ,   lFromKappa
@@ -10,13 +11,15 @@ module Maths.QuantumNumbers
 ,   nthKappaElevel
 
 ,   reachableKappas
+
+,   mValues
 ) where
 
 import           Data.Composition
 
 import           Maths.QuantumNumbers.Error
 import           Maths.QuantumNumbers.Internal (QNum, intFromQNum,
-                                                doubleFromQNum)
+                                                doubleFromQNum,scalarFromQNum)
 import qualified Maths.QuantumNumbers.Internal as I
 
 
@@ -36,3 +39,12 @@ nthKappaElevel kappa n = checkKappaN kappa n $ n-I.lFromKappa kappa
 
 reachableKappas :: QNum -> [QNum]
 reachableKappas kappa = checkKappa kappa $ I.reachableKappas kappa
+
+
+
+mValues :: QNum -> [QNum]
+mValues qN = let mValuesRec m
+                    | m==qN     = [m]
+                    | otherwise =  m : mValuesRec (m+1)
+              in mValuesRec (-qN)
+

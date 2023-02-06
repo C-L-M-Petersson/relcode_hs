@@ -8,7 +8,7 @@ import           QState.Units
 import           QState.Units.Internal
 
 
-type Pulse = Double -> Double
+type Pulse = Double -> Scalar
 
 
 omega0 :: EnergyUnit -> CDict -> Double
@@ -18,16 +18,28 @@ fwhm   :: EnergyUnit -> CDict -> Double
 fwhm   eu cDict = eu`from`cDictReadOption "fwhm"   cDict
 
 
+pulsePhase :: EnergyUnit -> CDict -> Double -> Double
+pulsePhase eu cDict omega = 0`polyRec`cDictReadOption "phasePolynomial" cDict
+    where
+        dOmega = to eu $ omega-omega0 eu cDict
+
+        polyRec :: Double -> [Double] -> Double
+        polyRec i (a:as) = a*dOmega**i + polyRec (i+1) as
+        polyRec _  _     = 0
+
+
 
 xuv :: EnergyUnit -> CDict -> Pulse
 xuv eu cDict omega
     | omega0 eu cDict==0 = 1
-    | otherwise          = exp( -4*log 2*(omega-omega0 eu cDict)**2
-                                            /fwhm eu cDict**2 )
+    | otherwise          = exp( -4*log 2*dOmega**2/fwhm'**2 )*phaseFact
+    where
+        dOmega    = fromReal $ omega-omega0 eu cDict
+        fwhm'     = fromReal $ fwhm         eu cDict
+        phaseFact = exp(i $ pulsePhase eu cDict omega)
 
 xuvKet :: [Double] -> EnergyUnit -> CDict -> Ket
-xuvKet os eu cDict = Ket (Just Energy) (Just os)
-                         ((fromReal . xuv eu cDict)`map`os)
+xuvKet os eu cDict = Ket (Just Energy) (Just os) (xuv eu cDict`map`os)
 
 
 

@@ -1,8 +1,8 @@
-module Maths.HilbertSpace.Evolving.WignerFunction where
--- (   WignerFunction
--- ,   getWignerFunctionFromDensityMatrix
--- ,   wignerFunctionFromDensityMatrix
--- ) where
+module Maths.HilbertSpace.Evolving.WignerFunction
+(   WignerFunction
+,   getWignerFunctionFromDensityMatrix
+,   wignerFunctionFromDensityMatrix
+) where
 
 import           Data.List
 import           Data.Maybe
@@ -40,19 +40,12 @@ wignerFunctionFromDensityMatrixT rho t = Ket ut es
         eis = [0..length (fromJust es)]
 
 wignerFunctionFromDensityMatrixTEi :: DensityMatrix -> Double -> Int -> Scalar
-wignerFunctionFromDensityMatrixTEi rho t eI = 2*fromReal dE*opElem rho eI eI
-                                            + valsRec (-dE) (eI-1) (eI+1) True
-                                            + valsRec   dE  (eI+1) (eI-1) False
+wignerFunctionFromDensityMatrixTEi rho t eI = 2*fromReal dE*sum (map fftVal dCs)
     where
-        dE = let es = fromJust $ basis rho
-              in (last es-head es)/genericLength es
+        dE = let es = fromJust $ basis rho in (last es-head es)/genericLength es
         bLen = length . fromJust $ basis rho
-        halfBLen = bLen`div`2
 
-        valsRec :: Double -> Int -> Int -> Bool -> Scalar
-        valsRec deltaE r c posDeltaE
-            | r<0 || r>=bLen = 0
-            | c<0 || c>=bLen = 0
-            | posDeltaE      = val+valsRec (deltaE+dE) (r-1) (c+1) posDeltaE
-            | otherwise      = val+valsRec (deltaE-dE) (r+1) (c-1) posDeltaE
-            where val = 2*fromReal dE*opElem rho r c*exp(-2*i(t*deltaE))
+        dCs = let dIMax = (bLen-1-eI)`min`eI in [-dIMax..dIMax]
+
+        fftVal :: Int -> Scalar
+        fftVal dC = opElem rho (eI-dC) (eI+dC)*exp(-2*i(t*dE*fromIntegral dC))

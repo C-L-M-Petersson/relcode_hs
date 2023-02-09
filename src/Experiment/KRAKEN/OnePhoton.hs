@@ -33,7 +33,7 @@ kraken1phForQNums kappas0 ns0 kappas1 = whenRunKraken1ph $
                         <=<getWignerFunctionFromDensityMatrix
                  ] . flip ($)
         >>getPureStateSum kappas0 ns0 kappas1
-                >>=ifSaveData printQStateFileWithUnits "Psi1ph"
+                >>=ifSaveData printQStateFileWithUnits "Psi"
     where ifSaveData print key val = whenM (getReadOption ("save"++key++"1ph"))
                                    $ print ("outFile"++key++"1ph") val
 

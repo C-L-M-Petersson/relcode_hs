@@ -39,6 +39,9 @@ getEKinMin = withCDict . eKinMin=<<getEnergyUnit
 getEKinMax :: QState Double
 getEKinMax = withCDict . eKinMax=<<getEnergyUnit
 
+getEKinGrid :: QState [Double]
+getEKinGrid = withCDict . eKinGrid=<<getEnergyUnit
+
 
 
 interpolateEnergyKet :: Ket -> QState Ket

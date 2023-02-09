@@ -83,7 +83,8 @@ instance Show Scalar where
 smap :: (Complex Double -> Complex Double) -> Scalar -> Scalar
 smap f = Scalar . f . val
 
-liftScalar :: (Complex Double -> Complex Double -> Complex Double) -> Scalar -> Scalar -> Scalar
+liftScalar :: (Complex Double -> Complex Double -> Complex Double) -> Scalar
+                                                            -> Scalar -> Scalar
 liftScalar f (Scalar v) (Scalar v') = Scalar (f v v')
 
 

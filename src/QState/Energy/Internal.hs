@@ -53,7 +53,7 @@ eKinMax :: EnergyUnit -> CDict -> Double
 eKinMax eu cDict = eu`from`cDictReadOption "eKinMax" cDict
 
 eKinGrid :: EnergyUnit -> CDict -> [Double]
-eKinGrid eu cDict = takeWhile (<eMax) $ map ((+eMin) . (*de)) [0..]
+eKinGrid eu cDict = takeWhile (<=eMax) $ map ((+eMin) . (*de)) [0..]
     where
         de   = (eMax-eMin)/(fromIntegral eN-1)
         eN   = nEs cDict

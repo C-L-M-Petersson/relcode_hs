@@ -1,10 +1,9 @@
 module Maths.HilbertSpace.Operator where
-import QState.Units.Energy
-import System.IO.Unsafe
 
 import           Data.Composition
 import           Data.List
-import           Data.Maybe
+
+import           GHC.Data.Maybe
 
 import           Maths.HilbertSpace.Distribution
 import           Maths.HilbertSpace.Ket
@@ -31,8 +30,7 @@ instance HasUnit Operator where
     unitType = opBasisUnitOuter
     toUnits   (Operator mUT mBO cs) = Operator mUT<$>mBO'<*>mapM toUnits   cs
         where mBO' = case (mUT,mBO) of
-                -- _                 -> getEnergyUnit (fromJust mUT)>>=error . show
-                (Just ut,Just bo) -> Just . (`map`bo) . to  <$>return EV
+                (Just ut,Just bo) -> Just . (`map`bo) . to  <$>getUnit ut
                 _                 -> return mBO
     fromUnits (Operator mUT mBO cs) = Operator mUT<$>mBO'<*>mapM fromUnits cs
         where mBO' = case (mUT,mBO) of
@@ -63,6 +61,12 @@ opRows :: Operator -> [Ket]
 opRows op = map (Ket (opBasisUnitOuter op) (opBasisOuter op))
                                         . transpose . map ketElems $ opCols op
 
+opElems :: Operator -> [[Scalar]]
+opElems = map ketElems . opRows
+
+opElem :: Operator -> Int -> Int -> Scalar
+opElem op r c = (opElems op!!c)!!r
+
 
 
 opmap :: (Ket -> Ket) -> Operator -> Operator
@@ -70,8 +74,8 @@ opmap f o = o{ opCols = f`map`opCols o }
 
 liftOp2 :: (Ket -> Ket -> Ket) -> Operator -> Operator -> Operator
 liftOp2 f (Operator mUT mBO es) (Operator mUT' mBO' es') = Operator
-                                                (headMay $ catMaybes [mUT,mUT'])
-                                                (headMay $ catMaybes [mBO,mBO'])
+                                                (mUT`firstJust`mUT')
+                                                (mBO`firstJust`mBO')
                                                 (zipWith f es es')
 
 
@@ -126,3 +130,6 @@ offDiag o c
             | i>=length xs    = []
             | otherwise       = xs!!i : offDiagRec (i+1) xss
         offDiagRec _  _       = []
+
+reverseCols :: Operator -> Operator
+reverseCols op = op{ opCols = reverse $ opCols op }

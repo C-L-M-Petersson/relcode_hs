@@ -3,7 +3,8 @@ module Maths.HilbertSpace.Ket where
 import           Control.Applicative             hiding ((<|>))
 
 import           Data.List
-import           Data.Maybe
+
+import           GHC.Data.Maybe
 
 import           Maths.HilbertSpace.Distribution
 import           Maths.HilbertSpace.Scalar
@@ -62,8 +63,8 @@ kmap :: (Scalar -> Scalar) -> Ket -> Ket
 kmap f k = k{ ketElems = f`map`ketElems k }
 
 liftKet2 :: (Scalar -> Scalar -> Scalar) -> Ket -> Ket -> Ket
-liftKet2 f (Ket uT mB es) (Ket uT' mB' es') = Ket (headMay $ catMaybes [uT,uT'])
-                                                  (headMay $ catMaybes [mB,mB'])
+liftKet2 f (Ket uT mB es) (Ket uT' mB' es') = Ket (uT`firstJust`uT')
+                                                  (mB`firstJust`mB')
                                                   (zipWith f es es')
 
 

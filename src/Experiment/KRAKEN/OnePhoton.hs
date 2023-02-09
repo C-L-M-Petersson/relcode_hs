@@ -6,9 +6,9 @@ import           Control.Monad.Extra
 import           Data.Composition
 import           Data.List
 
-import           Maths.HilbertSpace.DensityMatrix
 import           Maths.HilbertSpace.Ket
-import           Maths.HilbertSpace.Operator
+import           Maths.HilbertSpace.Operator.DensityMatrix
+import           Maths.HilbertSpace.Evolving.WignerFunction
 import           Maths.QuantumNumbers
 
 import           QState
@@ -26,14 +26,16 @@ kraken1ph = whenRunKraken1ph . join $ kraken1phForQNums
 kraken1phForQNums :: [QNum] -> [QNum] -> [QNum] -> QState()
 kraken1phForQNums kappas0 ns0 kappas1 = whenRunKraken1ph $
     getDensityMatrix kappas0 ns0 kappas1
-        >>=forM_ [ ifSaveData printQStateFileWithUnits "Rho1ph"
-                 , ifSaveData printQStateFile "Purity1ph"      . purity
-                 , ifSaveData printQStateFile "Concurrence1ph" . concurrence
+        >>=forM_ [ ifSaveData printQStateFileWithUnits "Rho"
+                 , ifSaveData printQStateFile "Purity"      . purity
+                 , ifSaveData printQStateFile "Concurrence" . concurrence
+                 , ifSaveData printQStateFileWithUnits "WignerFunc"
+                        <=<getWignerFunctionFromDensityMatrix
                  ] . flip ($)
         >>getPureStateSum kappas0 ns0 kappas1
                 >>=ifSaveData printQStateFileWithUnits "Psi1ph"
-    where ifSaveData print key val = whenM (getReadOption ("save"++key))
-                                   $ print ("outFile"++key) val
+    where ifSaveData print key val = whenM (getReadOption ("save"++key++"1ph"))
+                                   $ print ("outFile"++key++"1ph") val
 
 whenRunKraken1ph :: QState() -> QState()
 whenRunKraken1ph = whenM (getReadOption "runKRAKEN1ph")

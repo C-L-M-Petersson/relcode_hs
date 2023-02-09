@@ -7,9 +7,10 @@ import           Control.Monad.Extra
 import           Data.Composition
 import           Data.List
 
-import           Maths.HilbertSpace.DensityMatrix
 import           Maths.HilbertSpace.Distribution
+import           Maths.HilbertSpace.Evolving.WignerFunction
 import           Maths.HilbertSpace.Ket
+import           Maths.HilbertSpace.Operator.DensityMatrix
 import           Maths.QuantumNumbers
 
 import           QState
@@ -32,15 +33,17 @@ kraken2phForQNums :: [QNum] -> [QNum] -> [QNum] -> [QNum] -> Int -> QState()
 kraken2phForQNums kappas0 ns0 kappas1 kappas2 eFinalIndex = whenRunKraken2ph $
     getReconstructedOnePhotonDensityMatrix kappas0 ns0
                                             kappas1 kappas2 eFinalIndex
-        >>=forM_ [ ifSaveData printQStateFileWithUnits "Rho2ph"
-                 , ifSaveData printQStateFile "Purity2ph"      . purity
-                 , ifSaveData printQStateFile "Concurrence2ph" . concurrence
+        >>=forM_ [ ifSaveData printQStateFileWithUnits "Rho"
+                 , ifSaveData printQStateFile "Purity"      . purity
+                 , ifSaveData printQStateFile "Concurrence" . concurrence
+                 , ifSaveData printQStateFileWithUnits "WignerFunc"
+                        <=<getWignerFunctionFromDensityMatrix
                  ] . flip ($)
         >>getPureStateSumByOnePhotonEnergy kappas0 ns0
                                             kappas1 kappas2 eFinalIndex
-            >>=ifSaveData printQStateFileWithUnits "Psi2ph"
-    where ifSaveData print key val = whenM (getReadOption ("save"++key))
-                                   $ print ("outFile"++key) val
+            >>=ifSaveData printQStateFileWithUnits "Psi"
+    where ifSaveData print key val = whenM (getReadOption ("save"++key++"2ph"))
+                                   $ print ("outFile"++key++"2ph") val
 
 whenRunKraken2ph :: QState() -> QState()
 whenRunKraken2ph = whenM (getReadOption "runKRAKEN2ph")

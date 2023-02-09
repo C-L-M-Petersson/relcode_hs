@@ -24,6 +24,9 @@ instance Unit GenericUnit where
     toGeneric                       = id
     toUnitFactor (GenericUnit fact) = fact
 
+unitI :: GenericUnit
+unitI = GenericUnit 1
+
 
 to :: Unit a => a -> Double -> Double
 to u = (toUnitFactor u*)

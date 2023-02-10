@@ -20,25 +20,16 @@ MAIN=$(SRCDIR)/Main.hs
 GHC=ghc --make
 GHCDIRS=-odir $(ODIR) -hidir $(HIDIR) -i$(SRCDIR)
 GHCOPTS=-dynamic -O2 $(patsubst %, -package %, $(GHCPKGS))
-GHCPKGS=base        \
-        composition \
-        extra       \
-        lens        \
-        mtl         \
-        safe        \
-        split       \
-        utility-ht
-        #bytestring            \
-        #composition           \
-        #directory             \
-        #extra                 \
-        #haskell-mpi           \
-        #mtl                   \
-        #numeric-limits        \
-        #random                \
-        #silently              \
-        #system-posix-redirect \
-        #unix                  \
+GHCPKGS=base           \
+        composition    \
+        extra          \
+        lens           \
+        mtl            \
+        safe           \
+        split          \
+        utility-ht     \
+        wigner-symbols \
+        yjtools
 
 # }}}
 

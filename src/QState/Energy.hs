@@ -33,23 +33,22 @@ getInterpolatedXUVKet = (e_s<$>getOmegasXUV<*>getNEs)>>=getXUVKetOnGrid
 getNEs :: QState Int
 getNEs = withCDict nEs
 
-getEKinMin :: QState Double
-getEKinMin = withCDict . eKinMin=<<getEnergyUnit
+getEGridMin :: QState Double
+getEGridMin = withCDict . eGridMin=<<getEnergyUnit
 
-getEKinMax :: QState Double
-getEKinMax = withCDict . eKinMax=<<getEnergyUnit
+getEGridMax :: QState Double
+getEGridMax = withCDict . eGridMax=<<getEnergyUnit
 
-getEKinGrid :: QState [Double]
-getEKinGrid = withCDict . eKinGrid=<<getEnergyUnit
+getEGrid :: QState [Double]
+getEGrid = withCDict . eGrid=<<getEnergyUnit
 
 
 
 interpolateEnergyKet :: Ket -> QState Ket
 interpolateEnergyKet = (<$>getNEs) . flip changeKetGridSize
 
-energyKetToEkinGrid :: Ket -> QState Ket
-energyKetToEkinGrid k = (`interpolateKet`k)
-                                    <$>(getEnergyUnit>>=withCDict . eKinGrid)
+energyKetToEGrid :: Ket -> QState Ket
+energyKetToEGrid k = (`interpolateKet`k)<$>(getEnergyUnit>>=withCDict . eGrid)
 
 
 

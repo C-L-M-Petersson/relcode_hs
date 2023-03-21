@@ -59,5 +59,5 @@ getPureStates kappas0 ns0 kappas1 = do
             ]
 
 getPureState :: QNum -> QNum -> [QNum] -> QState Ket
-getPureState kappa0 n0 kappas1 = energyKetToEkinGrid
+getPureState kappa0 n0 kappas1 = energyKetToEGrid
     =<<getInterpolatedExcitedStateByEkin kappa0 n0 kappas1

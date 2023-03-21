@@ -10,6 +10,8 @@ import           QState.Units.Internal
 
 type Pulse = Double -> Scalar
 
+data PulseTYpe = None | Gaussian deriving(Read)
+
 
 omega0 :: EnergyUnit -> CDict -> Double
 omega0 eu cDict = eu`from`cDictReadOption "omega0" cDict
@@ -30,9 +32,9 @@ pulsePhase eu cDict omega = 0`polyRec`cDictReadOption "phasePolynomial" cDict
 
 
 xuv :: EnergyUnit -> CDict -> Pulse
-xuv eu cDict omega
-    | omega0 eu cDict==0 = 1
-    | otherwise          = exp( -4*log 2*dOmega**2/fwhm'**2 )*phaseFact
+xuv eu cDict omega = case (cDictReadOption "pulseType" cDict) of
+        None     -> 1
+        Gaussian -> exp( -4*log 2*dOmega**2/fwhm'**2 )*phaseFact
     where
         dOmega    = fromReal $ omega-omega0 eu cDict
         fwhm'     = fromReal $ fwhm         eu cDict
@@ -46,16 +48,16 @@ xuvKet os eu cDict = Ket (Just Energy) (Just os) (xuv eu cDict`map`os)
 nEs :: CDict -> Int
 nEs = cDictReadOption "nEs"
 
-eKinMin :: EnergyUnit -> CDict -> Double
-eKinMin eu cDict = eu`from`cDictReadOption "eKinMin" cDict
+eGridMin :: EnergyUnit -> CDict -> Double
+eGridMin eu cDict = eu`from`cDictReadOption "eGridMin" cDict
 
-eKinMax :: EnergyUnit -> CDict -> Double
-eKinMax eu cDict = eu`from`cDictReadOption "eKinMax" cDict
+eGridMax :: EnergyUnit -> CDict -> Double
+eGridMax eu cDict = eu`from`cDictReadOption "eGridMax" cDict
 
-eKinGrid :: EnergyUnit -> CDict -> [Double]
-eKinGrid eu cDict = takeWhile (<=eMax) $ map ((+eMin) . (*de)) [0..]
+eGrid :: EnergyUnit -> CDict -> [Double]
+eGrid eu cDict = takeWhile (<=eMax) $ map ((+eMin) . (*de)) [0..]
     where
         de   = (eMax-eMin)/(fromIntegral eN-1)
         eN   = nEs cDict
-        eMin = eKinMin eu cDict
-        eMax = eKinMax eu cDict
+        eMin = eGridMin eu cDict
+        eMax = eGridMax eu cDict

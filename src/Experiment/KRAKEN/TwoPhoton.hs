@@ -83,4 +83,4 @@ getPureStateByOnePhotonEnergy kappa0 n0 kappas1 kappas2 msJ eFinalIndex =
                                   <*>getMElements [kappa0] [n0]
                                                    kappas1 kappas2
                                                    msJ eFinalIndex)
-        >>=((shiftBasis<$>getHFEnergy kappa0 n0)??)>>=energyKetToEkinGrid
+        >>=((shiftBasis<$>getHFEnergy kappa0 n0)??)>>=energyKetToEGrid

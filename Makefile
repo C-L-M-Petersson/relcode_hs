@@ -23,6 +23,7 @@ GHCOPTS=-dynamic -O2 $(patsubst %, -package %, $(GHCPKGS))
 GHCPKGS=base           \
         composition    \
         extra          \
+        gamma          \
         lens           \
         mtl            \
         safe           \

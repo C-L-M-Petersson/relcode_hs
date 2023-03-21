@@ -59,7 +59,7 @@ loadCDict = CDict . M.fromList <$> ((++)<$>getCDictFileKVs<*>getArgKVs)
         cDictFp :: IO FilePath
         cDictFp = headDef defCDictFp . tailSafe . dropWhile (/="--cfg")
                                                                 <$>getArgs
-            where defCDictFp = "kraken.cfg"
+            where defCDictFp = "config.cfg"
 
         parseCDictFile :: FilePath -> [(String,String)]
         parseCDictFile = map (mapPair (trim,trim . tail) . break (=='='))
@@ -93,3 +93,6 @@ cDictOptionSafe k = M.lookup k . cDictMap
 readOptionVal :: Read a => String -> String -> a
 readOptionVal k v = let mrv = readMay v in fromMaybe
     (error $ "value "++v++" of option "++k++" can not be read") mrv
+
+cDictInsertOption :: String -> String -> CDict -> CDict
+cDictInsertOption k v cDict = cDict{ cDictMap = M.insert k v $ cDictMap cDict }

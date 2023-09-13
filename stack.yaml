@@ -1,0 +1,11 @@
+resolver:
+  url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/21/11.yaml
+
+packages:
+- .
+
+extra-deps:
+  - continued-fractions-0.10.0.2@sha256:82808ad1721046ca406659331402c5d894946d974f9ba4925931e9c7e6934549,1782
+  - converge-0.1.0.1@sha256:47e5534a30ab798062012c003df12efcb9b3fbc63ac4f80525dcfc70737f1dc0,1203
+  - gamma-0.10.0.0@sha256:0d666fc486899a2e22f44aec1aa32c168e0803e6c2ddb266a18a07700ca5d95b,2051
+  - wigner-symbols-1.0.0@sha256:d57c7fe2941557410efe72d0262465390c9583634081e71363388b70da660177,2256

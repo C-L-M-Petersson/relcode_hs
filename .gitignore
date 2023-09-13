@@ -1,3 +1,5 @@
-localbuild/*
-run.x
 **/*.sw*
+*.cabal
+*.x
+.stack-work/
+stack.yaml.lock

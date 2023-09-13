@@ -1,9 +1,7 @@
 module QState.Configure.Internal where
 
 import           Data.Char
-import           Data.Composition
 import           Data.Functor
-import           Data.List
 import qualified Data.Map           as M
 import           Data.Maybe
 import           Data.Tuple.HT

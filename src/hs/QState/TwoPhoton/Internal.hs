@@ -46,9 +46,9 @@ readFileColKappa file kappa0 kappa1 kappa2 cDict
             | kappa1==  kappa0+signum kappa0 = Just 6
             | otherwise                      = Nothing
         colInner
-            | kappa2==  kappa1-signum kappa0 = Just 0
+            | kappa2==  kappa1-signum kappa1 = Just 0
             | kappa2== -kappa1               = Just 1
-            | kappa2==  kappa1+signum kappa0 = Just 2
+            | kappa2==  kappa1+signum kappa1 = Just 2
             | otherwise                      = Nothing
 
 

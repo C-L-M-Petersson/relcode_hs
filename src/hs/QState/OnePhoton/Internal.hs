@@ -5,17 +5,14 @@ module QState.OnePhoton.Internal
 ,   phaseG
 
 ,   matElem
-,   matElems
 ) where
 
-import           Data.Composition
-import           Data.List
+import           Data.List                   (transpose)
 
 import           Maths.HilbertSpace
 import           Maths.QuantumNumbers
 
 import           QState.Configure
-import           QState.Energy.Internal
 import           QState.FilePath.Internal
 import           QState.HartreeFock.Internal
 import           QState.Utility.Internal
@@ -32,8 +29,7 @@ fileCol file kappa0 n0 col cDict = map ((!!col) . words)
 readFileLines :: Read a => FilePath -> QNum -> QNum -> CDict -> IO [a]
 readFileLines file kappa0 n0 cDict = map read<$>fileLines file kappa0 n0 cDict
 
-readFileColIndex :: (Num a,Read a) => FilePath -> QNum -> QNum -> Int -> CDict
-                                                                    -> IO [a]
+readFileColIndex :: Read a => FilePath -> QNum -> QNum -> Int -> CDict -> IO [a]
 readFileColIndex file kappa0 n0 col cDict = map read
                                             <$>fileCol file kappa0 n0 col cDict
 
@@ -47,7 +43,6 @@ readFileColKappa file kappa0 n0 kappa1 cDict
             | kappa1== -kappa0               =  2
             | kappa1==  kappa0+signum kappa0 =  3
             | otherwise                      = -1
-
 
 
 omegas :: QNum -> QNum -> CDict -> IO [Double]
@@ -69,7 +64,6 @@ phaseG :: QNum -> QNum -> QNum -> CDict -> IO [Double]
 phaseG = readFileColKappa "/phaseG_all"
 
 
-
 matElem :: QNum -> QNum -> QNum -> CDict -> IO [Scalar]
 matElem kappa0 n0 kappa1 cDict = map product . transpose
     <$>sequence [ map        fromReal <$>amps   kappa0 n0 kappa1 cDict
@@ -77,9 +71,3 @@ matElem kappa0 n0 kappa1 cDict = map product . transpose
                 , map (exp . fromImag  . negate . coulombPhase kappa1)
                                       <$>eKins kappa0 n0 cDict
                 ]
-
-matElems :: [QNum] -> [QNum] -> [QNum] -> CDict -> IO [Scalar]
-matElems  []               []      _       cDict = return $ repeat 0
-matElems (kappa0:kappas0) (n0:ns0) kappas1 cDict = map product . transpose
-    <$>sequence ( matElems kappas0 ns0 kappas1 cDict
-                : map (flip (matElem kappa0 n0) cDict) kappas1 )

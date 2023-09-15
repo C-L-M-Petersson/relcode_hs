@@ -3,10 +3,6 @@ github:              "githubuser/Relcode-hs"
 author:              "C Leon M Petersson"
 maintainer:          "leon.petersson@fysik.su.se"
 
-extra-source-files:
-- README.md
-- CHANGELOG.md
-
 description:         Interpret output from relcode.
 
 dependencies:
@@ -43,7 +39,7 @@ library:
 executables:
   Relcode.x:
     main:                Relcode.hs
-    source-dirs:         app
+    source-dirs:         app/hs
     ghc-options:
     - -threaded
     - -rtsopts

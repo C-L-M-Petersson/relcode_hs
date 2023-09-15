@@ -1,6 +1,25 @@
-module Maths.HilbertSpace.Distribution where
+module Maths.HilbertSpace.Distribution
+(   Distributed
+,   norm
+,   norm2
+,   scale
+,   normalise
 
-import           Data.List
+,   basis
+,   setBasis
+,   modifyBasis
+,   modifyBasisElems
+,   delta
+,   timesDelta
+,   byDelta
+
+,   scaleBasis
+,   shiftBasis
+,   basisHead
+,   basisTail
+) where
+
+import           Data.List  (genericLength)
 import           Data.Maybe
 
 
@@ -50,7 +69,6 @@ scaleBasis = modifyBasisElems . (*)
 
 shiftBasis :: Distributed a => Double -> a -> a
 shiftBasis = modifyBasisElems . (+)
-
 
 
 basisHead :: Distributed a => a -> Maybe Double

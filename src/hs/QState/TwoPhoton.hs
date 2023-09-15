@@ -1,15 +1,18 @@
-module QState.TwoPhoton where
+module QState.TwoPhoton
+(   getEnergyRPA
+,   getEnergyFin
 
-import           Control.Monad
+,   getMElement
+,   getMElements
+) where
 
 import           Data.Composition
-import           Data.List
+import           Data.List                 (transpose)
 
 import           Maths.HilbertSpace.Scalar
 import           Maths.QuantumNumbers
 
 import           QState
-import           QState.Energy
 import           QState.TwoPhoton.Internal
 
 

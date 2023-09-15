@@ -1,4 +1,20 @@
-module QState.Energy.Internal where
+module QState.Energy.Internal
+(   Pulse
+,   PulseType
+
+,   omega0
+,   fwhm
+
+,   pulsePhase
+
+,   xuv
+,   xuvKet
+
+,   nEs
+,   eGridMin
+,   eGridMax
+,   eGrid
+) where
 
 import           Maths.HilbertSpace.Ket
 import           Maths.HilbertSpace.Scalar
@@ -10,7 +26,7 @@ import           QState.Units.Internal
 
 type Pulse = Double -> Scalar
 
-data PulseTYpe = None | Gaussian deriving(Read)
+data PulseType = None | Gaussian deriving(Read)
 
 
 omega0 :: EnergyUnit -> CDict -> Double
@@ -26,8 +42,8 @@ pulsePhase eu cDict omega = 0`polyRec`cDictReadOption "phasePolynomial" cDict
         dOmega = to eu $ omega-omega0 eu cDict
 
         polyRec :: Double -> [Double] -> Double
-        polyRec i (a:as) = a*dOmega**i + polyRec (i+1) as
-        polyRec _  _     = 0
+        polyRec ind (a:as) = a*dOmega**ind + polyRec (ind+1) as
+        polyRec _   _      = 0
 
 
 
@@ -41,7 +57,7 @@ xuv eu cDict omega = case (cDictReadOption "pulseType" cDict) of
         phaseFact = exp(i $ pulsePhase eu cDict omega)
 
 xuvKet :: [Double] -> EnergyUnit -> CDict -> Ket
-xuvKet os eu cDict = Ket (Just Energy) (Just os) (xuv eu cDict`map`os)
+xuvKet os eu cDict = ket (Just Energy) (Just os) (xuv eu cDict`map`os)
 
 
 

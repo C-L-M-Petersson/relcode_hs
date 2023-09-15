@@ -1,21 +1,32 @@
-module Experiment.CrossSections.OnePhoton where
+{-# OPTIONS_GHC -Wno-incomplete-uni-patterns #-}
+module Experiment.CrossSections.OnePhoton
+(   crossSections1ph
+,   crossSections1phForQNums
+,   whenRunCrossSections1ph
 
---import           Control.Monad
+,   saveCrossSections1ph
+
+,   saveBranchingRatios1ph
+,   saveBranchingRatio1ph
+,   getBranchingRatio
+
+,   putStrQStateVec
+,   showVec
+
+,   getTotalTransitionAmplitudesByGroundState
+,   getTransitionAmplitudesByGroundState
+,   getTransitionAmplitude
+) where
+
 import           Control.Monad.Extra
---
---import           Data.Composition
-import           Data.List
+
 import           Data.List.Extra
-import           Data.Maybe
---
+
 import           Maths.HilbertSpace.Ket
 import           Maths.HilbertSpace.Scalar
---import           Maths.HilbertSpace.Operator.DensityMatrix
---import           Maths.HilbertSpace.Evolving.WignerFunction
 import           Maths.QuantumNumbers
 
 import           QState
---import           QState.Coherence
 import           QState.Configure
 import           QState.Energy
 import           QState.OnePhoton
@@ -42,26 +53,24 @@ whenRunCrossSections1ph :: QState() -> QState()
 whenRunCrossSections1ph = whenM (getReadOption "runCrossSection1ph")
 
 
-
 saveCrossSections1ph :: [QNum] -> [QNum] -> [QNum] -> QState()
-saveCrossSections1ph kappas0 ns0 kappas1 = mapM_ ($kappas1)
+saveCrossSections1ph kappas0 ns0 kappas1 = mapM_ ($ kappas1)
                         $ zipWith saveCrossSections1phByGroundState kappas0 ns0
     where
         saveCrossSections1phByGroundState :: QNum -> QNum -> [QNum] -> QState()
-        saveCrossSections1phByGroundState kappa0 n0 kappas1 = withOptions
+        saveCrossSections1phByGroundState kappa0 n0 kappas1_ = withOptions
                                                     ["kappas0","ns0","kappas1"]
                                           (map show [[kappa0 ],[n0 ], kappas1'])
             $ (`putStrQStateVec`"outFileCrossSection1ph") . transpose
                 =<<mapM (getTotalTransitionAmplitudesByGroundState kappa0 n0)
                         ([kappas1']++map (:[]) kappas1')
-            where kappas1' = filter (`elem`kappas1) $ reachableKappas kappa0
+            where kappas1' = filter (`elem`kappas1_) $ reachableKappas kappa0
 
 
 saveBranchingRatios1ph :: [QNum] -> [QNum] -> [QNum] -> QState()
 saveBranchingRatios1ph kappas0 ns0 kappas1 = (`mapM_`groundStateGroups)
                     (\(n0,k0,k0') -> saveBranchingRatio1ph k0 n0 k0' n0 kappas1)
     where
-        --groundStateGroups :: [(QNum,QNum,QNum)]
         groundStateGroups = map (\[(n0,k0),(_,k0')] -> (n0,k0,k0'))
                           . filter ((==2) . length)
                           . groupOn (lFromKappa . snd) $ zip ns0 kappas0

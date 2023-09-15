@@ -1,10 +1,25 @@
-module Maths.QuantumNumbers.Internal where
+{-# OPTIONS_GHC -Wno-unused-top-binds #-}
+module Maths.QuantumNumbers.Internal
+(   QNum
+,   isHalf
+
+,   intFromQNum
+,   doubleFromQNum
+,   scalarFromQNum
+
+,   kappaFromJL
+,   lFromKappa
+,   jFromKappa
+,   nthKappaElevel
+
+,   reachableKappas
+) where
 
 import           Maths.HilbertSpace.Scalar
 
 
-data QNum = QNum { base :: Int
-                 , half :: Bool
+data QNum = QNum { base_ :: Int
+                 , half_ :: Bool
                  } deriving(Eq)
 
 instance Fractional QNum where
@@ -23,10 +38,10 @@ instance Num QNum where
         | h&&h'       = QNum (b+b'+1) False
         | otherwise   = QNum (b+b'  ) (h||h')
     QNum b h*QNum b' h'
-        | not (h||h') = QNum (b*b') h
         | h&&h'       = errNonHalfInteger
         | h'          = QNum (b*b'+(b `div`2)) (odd b )
         | h           = QNum (b*b'+(b'`div`2)) (odd b')
+        | otherwise   = QNum (b*b') h
     negate (QNum b h)
         | h           = QNum (-b-1) h
         | otherwise   = QNum (-b  ) h
@@ -62,23 +77,24 @@ instance Show QNum where
         | h         = show (2*b+1)++"/2"
         | otherwise = show b
 
+isHalf :: QNum -> Bool
+isHalf = half_
+
 errNonHalfInteger :: a
 errNonHalfInteger = error "can only treat whole or half integer quantum numbers"
 
 
-
 intFromQNum :: QNum -> Int
-intFromQNum (QNum base False) = base
-intFromQNum  q                = error
+intFromQNum (QNum b False) = b
+intFromQNum  q             = error
     $ "cannot convert "++show (doubleFromQNum q)++" to int"
 
 doubleFromQNum :: QNum -> Double
-doubleFromQNum (QNum base True ) = fromIntegral base+0.5
-doubleFromQNum (QNum base False) = fromIntegral base
+doubleFromQNum (QNum b True ) = fromIntegral b+0.5
+doubleFromQNum (QNum b False) = fromIntegral b
 
 scalarFromQNum :: QNum -> Scalar
 scalarFromQNum = fromReal . doubleFromQNum
-
 
 
 kappaFromJL :: QNum -> QNum -> QNum
@@ -94,7 +110,6 @@ jFromKappa kappa = abs kappa-1/2
 
 nthKappaElevel :: QNum -> QNum -> QNum
 nthKappaElevel kappa n = n-lFromKappa kappa
-
 
 
 reachableKappas :: QNum -> [QNum]

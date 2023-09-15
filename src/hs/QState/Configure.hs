@@ -38,8 +38,8 @@ withOptions  _      _     s = s
 withOption :: String -> String -> QState a -> QState a
 withOption k v s = do
     cDict <- getCDict
-    modify (\s -> s{ cDict = cDictInsertOption k v cDict })
+    modify (\s_ -> s_{ cDict_ = cDictInsertOption k v cDict })
     x <- s
-    modify (\s -> s{ cDict = cDict })
+    modify (\s_ -> s_{ cDict_ = cDict })
 
     return x

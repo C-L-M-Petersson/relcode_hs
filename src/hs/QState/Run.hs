@@ -1,9 +1,11 @@
-module QState.Run where
+module QState.Run
+(   runQState
+,   initialiseQState
+) where
 
 import           Control.Monad.State
 
 import           QState
-import           QState.Configure
 import           QState.Configure.Internal
 import           QState.Internal
 
@@ -20,19 +22,19 @@ initialiseQState = do
     let runDir = "runDir"`cDictOption`cDict
     runDirFiles <- listDirectory runDir
 
-    omegasXUV <- getOmegasXUV runDir (((=="pert_") . take 5)`filter`runDirFiles)
+    omegasXUV <- readOmegasXUV runDir (((=="pert_").take 5)`filter`runDirFiles)
 
     return System
-           { cDict     = cDict
-           , eUnit     = cDictReadOption "energyUnits" cDict
-           , tUnit     = cDictReadOption "timeUnits"   cDict
+           { cDict_     = cDict
+           , eUnit_     = cDictReadOption "energyUnits" cDict
+           , tUnit_     = cDictReadOption "timeUnits"   cDict
 
-           , twoPhoton = "second_photon"`elem`runDirFiles
+           , twoPhoton_ = "second_photon"`elem`runDirFiles
 
-           , omegasXUV = omegasXUV
+           , omegasXUV_ = omegasXUV
            }
     where
-        getOmegasXUV :: String -> [String] -> IO [Double]
-        getOmegasXUV rD (fp:_) = let fp' = rD++fp++"/omega.dat"
-                                     in map read . lines<$>readFile fp'
-        getOmegasXUV _   _     = error "no pert directory in run directory"
+        readOmegasXUV :: String -> [String] -> IO [Double]
+        readOmegasXUV rD (fp:_) = let fp' = rD++fp++"/omega.dat"
+                                   in map read . lines<$>readFile fp'
+        readOmegasXUV _   _     = error "no pert directory in run directory"

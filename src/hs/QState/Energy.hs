@@ -1,8 +1,19 @@
-module QState.Energy where
+module QState.Energy
+(   getXUV
+,   getXUVKetOnGrid
+,   getXUVKet
+,   getInterpolatedXUVKet
 
-import           Control.Monad
+,   getNEs
+,   getEGridMin
+,   getEGridMax
+,   getEGrid
 
-import           Data.Composition
+,   interpolateEnergyKet
+,   energyKetToEGrid
+
+,   interpolatedExcitedState
+) where
 
 import           Maths.HilbertSpace
 import           Maths.Interpolate
@@ -54,4 +65,4 @@ energyKetToEGrid k = (`interpolateKet`k)<$>(getEnergyUnit>>=withCDict . eGrid)
 
 interpolatedExcitedState :: [Double] -> [Scalar] -> QState Ket
 interpolatedExcitedState es vs = (*)<$>getInterpolatedXUVKet
-                        <*>interpolateEnergyKet (Ket (Just Energy) (Just es) vs)
+                        <*>interpolateEnergyKet (ket (Just Energy) (Just es) vs)

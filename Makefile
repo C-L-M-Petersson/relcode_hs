@@ -31,6 +31,6 @@ $(EXECUTABLE): $(HSSOURCE)
 	mkdir -p $@
 
 clean:
-	rm -r $(BUILDDIR)
+	stack clean
 
 # }}}

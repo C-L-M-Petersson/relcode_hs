@@ -1,4 +1,13 @@
-module QState.Internal where
+module QState.Internal
+(   System(System)
+,   cDict_
+,   eUnit_
+,   tUnit_
+
+,   twoPhoton_
+
+,   omegasXUV_
+) where
 
 import           QState.Configure.Internal
 import           QState.Units.Energy
@@ -6,11 +15,11 @@ import           QState.Units.Time
 
 
 data System = System
-              { cDict     :: CDict
-              , eUnit     :: EnergyUnit
-              , tUnit     :: TimeUnit
+              { cDict_     :: CDict
+              , eUnit_     :: EnergyUnit
+              , tUnit_     :: TimeUnit
 
-              , twoPhoton :: Bool
+              , twoPhoton_ :: Bool
 
-              , omegasXUV :: [Double]
+              , omegasXUV_ :: [Double]
               }

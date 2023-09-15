@@ -1,11 +1,19 @@
-module Experiment.KRAKEN.TwoPhoton where
+module Experiment.KRAKEN.TwoPhoton
+(   kraken2ph
+,   kraken2phForQNums
+,   whenRunKraken2ph
+
+,   getReconstructedOnePhotonDensityMatrix
+,   getPureStateSumByOnePhotonEnergy
+,   getPureStatesByOnePhotonEnergy
+,   getPureStateByOnePhotonEnergy
+) where
 
 import           Control.Lens
 import           Control.Monad
 import           Control.Monad.Extra
 
 import           Data.Composition
-import           Data.List
 
 import           Maths.HilbertSpace.Distribution
 import           Maths.HilbertSpace.Evolving.WignerFunction
@@ -42,12 +50,11 @@ kraken2phForQNums kappas0 ns0 kappas1 kappas2 eFinalIndex = whenRunKraken2ph $
         >>getPureStateSumByOnePhotonEnergy kappas0 ns0
                                             kappas1 kappas2 eFinalIndex
             >>=ifSaveData printQStateFileWithUnits "Psi"
-    where ifSaveData print key val = whenM (getReadOption ("save"++key++"2ph"))
-                                   $ print ("outFile"++key++"2ph") val
+    where ifSaveData save key val = whenM (getReadOption ("save"++key++"2ph"))
+                                  $ save ("outFile"++key++"2ph") val
 
 whenRunKraken2ph :: QState() -> QState()
 whenRunKraken2ph = whenM (getReadOption "runKRAKEN2ph")
-
 
 
 getReconstructedOnePhotonDensityMatrix ::  [QNum] -> [QNum] -> [QNum] -> [QNum]

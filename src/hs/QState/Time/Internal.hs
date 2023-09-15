@@ -1,4 +1,9 @@
-module QState.Time.Internal where
+module QState.Time.Internal
+(   nTs
+,   tMin
+,   tMax
+,   tGrid
+) where
 
 import           QState.Configure.Internal
 import           QState.Units.Time

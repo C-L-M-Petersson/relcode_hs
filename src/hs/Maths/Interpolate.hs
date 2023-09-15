@@ -1,14 +1,17 @@
-module Maths.Interpolate where
+module Maths.Interpolate
+(   interpolateList
+,   interpolateKet
 
-import           Data.List
+,   changeGridSize
+,   changeKetGridSize
+) where
+
 import           Data.Maybe
 
 import           Maths.HilbertSpace
-import           Maths.HilbertSpace.Distribution
 
 
-interpolateList :: (Eq a,Ord a,Fractional b) => (a -> b) -> [a] -> [a] -> [b]
-                                                                       -> [b]
+interpolateList :: (Ord a,Fractional b) => (a -> b) -> [a] -> [a] -> [b] -> [b]
 interpolateList f (x:xs) (x_:x_':x_s) (y:y':ys)
     | x< x_     = 0                                : t0
     | x==x_     = y                                : t0
@@ -24,12 +27,12 @@ interpolateKet xs k
     | isNothing(basis k) = error "cannot interpolate ket without basis"
     | otherwise          = let newElems = interpolateList fromReal xs
                                             (fromJust $ basis k) (ketElems k)
-                            in Ket (ketBasisUnit k) (Just xs) newElems
+                            in ket (ketBasisUnit k) (Just xs) newElems
 
 
 
-changeGridSize :: (Enum a,Eq a,Ord a,Fractional a,Fractional b) => (a -> b)
-                                                    -> Int -> [a] -> [b] -> [b]
+changeGridSize :: (Enum a,Ord a,Fractional a,Fractional b) => (a -> b) -> Int
+                                                            -> [a] -> [b] -> [b]
 changeGridSize f x_N xs ys = interpolateList f x_s xs ys
     where
         x_s   = takeWhile (<x_Max) $ map ((+x_Min) . (*dx_)) [0..]

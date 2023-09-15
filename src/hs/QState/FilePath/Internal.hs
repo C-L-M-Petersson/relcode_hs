@@ -1,4 +1,12 @@
-module QState.FilePath.Internal where
+module QState.FilePath.Internal
+(   cDictFilePath
+,   createCDictParentDir
+
+,   runDir
+,   hfDir
+,   pertDir
+,   secondPhotonDir
+) where
 
 import           Data.Composition
 import           Data.List.Split
@@ -19,8 +27,7 @@ cDictFilePath key cDict = concat
     where
         replace key' str = cDictOption key' cDict++str
         mapTail f (x:xs) = x:map f xs
-        tail' [] = []
-        tail' xs = tail xs
+        mapTail _ []     = []
 
 createCDictParentDir :: String -> CDict -> IO()
 createCDictParentDir = createDirectoryIfMissing True . takeDirectory

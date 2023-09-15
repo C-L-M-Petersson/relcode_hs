@@ -1,4 +1,7 @@
-module QState.Coherence where
+module QState.Coherence
+(   groupOnePhotonKappasByCoherence
+,   groupTwoPhotonKappasByCoherence
+) where
 
 import           Maths.QuantumNumbers
 

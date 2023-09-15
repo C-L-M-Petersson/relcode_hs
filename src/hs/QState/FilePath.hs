@@ -1,4 +1,12 @@
-module QState.FilePath where
+module QState.FilePath
+(   getCDictFilePath
+,   createParentDir
+
+,   getRunDir
+,   getHFDir
+,   getPertDir
+,   getSecondPhotonDir
+) where
 
 import           Data.Composition
 
@@ -13,7 +21,6 @@ getCDictFilePath = withCDict . cDictFilePath
 
 createParentDir :: String -> QState()
 createParentDir = withCDictM . createCDictParentDir
-
 
 
 getRunDir :: QState FilePath

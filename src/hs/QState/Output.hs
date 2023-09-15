@@ -1,11 +1,17 @@
-module QState.Output where
+module QState.Output
+(   printQState
+,   putStrQState
+,   putStrLnQState
+
+,   putStrQStateFile
+,   printQStateFile
+,   printQStateFileWithUnits
+) where
 
 import           Control.Lens ((??))
 import           Control.Monad
 
 import           Data.Composition
-
-import           Maths.HilbertSpace.Distribution
 
 import           QState
 import           QState.FilePath

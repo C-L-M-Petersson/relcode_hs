@@ -1,4 +1,6 @@
-module QState.Units.Time where
+module QState.Units.Time
+(   TimeUnit(AU,S,MS,US,NS,PS,FS,AS)
+) where
 
 import           QState.Units.Internal
 
@@ -24,6 +26,7 @@ instance Read TimeUnit where
     readsPrec _ ('p':'s':str) = [(PS,str)]
     readsPrec _ ('f':'s':str) = [(FS,str)]
     readsPrec _ ('a':'s':str) = [(AS,str)]
+    readsPrec _  str          = error $ "cannot read time unit "++str
 
 instance Unit TimeUnit where
     toUnitFactor AU = 1

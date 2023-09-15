@@ -19,7 +19,7 @@ module Maths.QuantumNumbers.Error
 ,   checkL
 ) where
 
-import           Data.List
+import           Data.List                     (intercalate)
 
 import           Maths.QuantumNumbers.Internal
 
@@ -101,23 +101,23 @@ checkNL n l x
 
 checkKappa :: QNum -> a -> a
 checkKappa kappa x
-    | kappa==0||half kappa = errQNumVals ["κ"] [kappa]
-    | otherwise            = x
+    | kappa==0||isHalf kappa = errQNumVals ["κ"] [kappa]
+    | otherwise              = x
 
 checkJ :: QNum -> a -> a
 checkJ j x
-    | j<0||not (half j) = errQNumVals ["j"] [j]
-    | otherwise         = x
+    | j<0||not (isHalf j) = errQNumVals ["j"] [j]
+    | otherwise           = x
 
 checkL :: QNum -> a -> a
 checkL l x
-    | l<0||half l = errQNumVals ["l"] [l]
-    | otherwise   = x
+    | l<0||isHalf l = errQNumVals ["l"] [l]
+    | otherwise     = x
 
 checkN :: QNum -> a -> a
 checkN n x
-    | n<1||half n = errQNumVals ["n"] [n]
-    | otherwise   = x
+    | n<1||isHalf n = errQNumVals ["n"] [n]
+    | otherwise     = x
 
 
 

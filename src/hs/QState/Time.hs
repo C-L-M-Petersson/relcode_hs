@@ -1,8 +1,9 @@
-module QState.Time where
+module QState.Time
+(   getTGrid
+) where
 
 import           QState
 import           QState.Time.Internal
-import           QState.Units.Time
 
 
 getTGrid :: QState [Double]

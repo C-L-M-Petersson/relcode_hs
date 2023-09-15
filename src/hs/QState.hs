@@ -16,10 +16,6 @@ module QState
 
 import           Control.Monad.State
 
-import           Data.Composition
-
-import           Maths.QuantumNumbers
-
 import           QState.Configure.Internal
 import           QState.Internal
 import           QState.Units.Energy
@@ -30,7 +26,7 @@ import           QState.Units.Time
 type QState a = StateT System IO a
 
 getCDict :: QState CDict
-getCDict = gets cDict
+getCDict = gets cDict_
 
 withCDict  :: (CDict -> a) -> QState a
 withCDict  = (<$>getCDict)
@@ -39,18 +35,16 @@ withCDictM :: (CDict -> IO a) -> QState a
 withCDictM x = liftIO . x=<<getCDict
 
 
-
 getUnit :: UnitType -> QState GenericUnit
 getUnit Energy = toGeneric<$>getEnergyUnit
 getUnit Time   = toGeneric<$>getTimeUnit
 
 getEnergyUnit :: QState EnergyUnit
-getEnergyUnit = gets eUnit
+getEnergyUnit = gets eUnit_
 
 getTimeUnit :: QState TimeUnit
-getTimeUnit = gets tUnit
-
+getTimeUnit = gets tUnit_
 
 
 getOmegasXUV :: QState [Double]
-getOmegasXUV = gets omegasXUV
+getOmegasXUV = gets omegasXUV_

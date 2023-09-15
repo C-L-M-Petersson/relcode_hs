@@ -1,12 +1,23 @@
-module QState.OnePhoton where
+module QState.OnePhoton
+(   getOmegas
+,   getEkins
+,   getAmps
+,   getPhaseF
+,   getPhaseG
+
+,   getMatElem
+,   getMatElems
+
+,   getInterpolatedExcitedStateByOmega
+,   getInterpolatedExcitedStateByEkin
+) where
 
 import           Control.Monad
 
 import           Data.Composition
-import           Data.List
+import           Data.List                 (transpose)
 
 import           Maths.HilbertSpace
-import           Maths.Interpolate
 import           Maths.QuantumNumbers
 
 import           QState
@@ -31,7 +42,6 @@ getPhaseG :: QNum -> QNum -> QNum -> QState [Double]
 getPhaseG = withCDictM.:.phaseG
 
 
-
 getMatElem :: QNum -> QNum -> QNum -> QState [Scalar]
 getMatElem = withCDictM.:.matElem
 
@@ -40,7 +50,8 @@ getMatElems  []               []       _      = return $ repeat 0
 getMatElems (kappa0:kappas0) (n0:ns0) kappas1 = zipWith (+)
         <$>(map sum . transpose<$>mapM (getMatElem kappa0 n0) kappas1)
         <*>getMatElems kappas0 ns0 kappas1
-
+getMatElems _                 _        _      = error
+    "inconsistent number of kappa- and n ground state quantum numbers provided"
 
 
 getInterpolatedExcitedStateByOmega :: [QNum] -> [QNum] -> [QNum] -> QState Ket

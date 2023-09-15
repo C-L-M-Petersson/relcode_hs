@@ -4,7 +4,7 @@ module Maths.HilbertSpace.Evolving.WignerFunction
 ,   wignerFunctionFromDensityMatrix
 ) where
 
-import           Data.List
+import           Data.List                                 (genericLength)
 import           Data.Maybe
 
 import           Maths.HilbertSpace.Evolving
@@ -32,7 +32,7 @@ wignerFunctionFromDensityMatrix rho ts = evolving (Just Time) ts
                                        $ wignerFunctionFromDensityMatrixT rho
 
 wignerFunctionFromDensityMatrixT :: DensityMatrix -> Double -> Ket
-wignerFunctionFromDensityMatrixT rho t = Ket ut es
+wignerFunctionFromDensityMatrixT rho t = ket ut es
                             $ map (wignerFunctionFromDensityMatrixTEi rho t) eis
     where
         ut  = unitType rho

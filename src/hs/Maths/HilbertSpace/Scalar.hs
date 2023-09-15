@@ -18,15 +18,15 @@ module Maths.HilbertSpace.Scalar
 ) where
 
 import           Data.Complex
-import           Data.List
+import           Data.List       (intercalate)
 import           Data.List.Split
 import           Data.List.Tools
 
 
-newtype Scalar = Scalar { val :: Complex Double }
+newtype Scalar = Scalar { val_ :: Complex Double }
 
 instance Eq Scalar where
-    s==s' = val s==val s'
+    s==s' = val_ s==val_ s'
 
 instance Floating Scalar where
         pi    = Scalar pi
@@ -71,17 +71,17 @@ instance Read Scalar where
                     in replace "NaN" "0" str
 
 instance Show Scalar where
-    show (Scalar (r:+i)) = show (r,i)
-        -- | r==0&&i==0 = "0"
-        -- | r==0       = show i++"i"
-        -- | i==0       = show r
-        -- | i< 0       = show r++show i++"i"
-        -- | otherwise  = show r++"+"++show i++"i"
+    show (Scalar (r:+i_))
+        | r ==0&&i_==0 = "0"
+        | r ==0        =              show i_++"i"
+        | i_==0        = show r
+        | i_< 0        = show r     ++show i_++"i"
+        | otherwise    = show r++"+"++show i_++"i"
 
 
 
 smap :: (Complex Double -> Complex Double) -> Scalar -> Scalar
-smap f = Scalar . f . val
+smap f = Scalar . f . val_
 
 liftScalar :: (Complex Double -> Complex Double -> Complex Double) -> Scalar
                                                             -> Scalar -> Scalar
@@ -101,26 +101,26 @@ i = fromImag
 
 
 toReal :: Scalar -> Double
-toReal = realPart . val
+toReal = realPart . val_
 
 toImag :: Scalar -> Double
-toImag = imagPart . val
+toImag = imagPart . val_
 
 absVal :: Scalar -> Double
-absVal = magnitude . val
+absVal = magnitude . val_
 
 phase :: Scalar -> Double
-phase = Data.Complex.phase . val
+phase = Data.Complex.phase . val_
 
 
 
 assertReal :: Scalar -> Double
-assertReal (Scalar (r:+0)) = r
-assertReal  s              = error $ "scalar "++show s++" not real"
+assertReal (Scalar (r:+0 )) = r
+assertReal  s               = error $ "scalar "++show s++" not real"
 
 assertImag :: Scalar -> Double
-assertImag (Scalar (0:+i)) = i
-assertImag  s              = error $ "scalar "++show s++" not imaginary"
+assertImag (Scalar (0:+i_)) = i_
+assertImag  s               = error $ "scalar "++show s++" not imaginary"
 
 
 

@@ -1,10 +1,18 @@
-module Experiment.KRAKEN.OnePhoton where
+module Experiment.KRAKEN.OnePhoton
+(   kraken1ph
+,   kraken1phForQNums
+,   whenRunKraken1ph
+
+,   getDensityMatrix
+,   getPureStateSum
+,   getPureStates
+,   getPureState
+) where
 
 import           Control.Monad
 import           Control.Monad.Extra
 
 import           Data.Composition
-import           Data.List
 
 import           Maths.HilbertSpace.Ket
 import           Maths.HilbertSpace.Operator.DensityMatrix
@@ -34,8 +42,8 @@ kraken1phForQNums kappas0 ns0 kappas1 = whenRunKraken1ph $
                  ] . flip ($)
         >>getPureStateSum kappas0 ns0 kappas1
                 >>=ifSaveData printQStateFileWithUnits "Psi"
-    where ifSaveData print key val = whenM (getReadOption ("save"++key++"1ph"))
-                                   $ print ("outFile"++key++"1ph") val
+    where ifSaveData save key val = whenM (getReadOption ("save"++key++"1ph"))
+                                  $ save ("outFile"++key++"1ph") val
 
 whenRunKraken1ph :: QState() -> QState()
 whenRunKraken1ph = whenM (getReadOption "runKRAKEN1ph")

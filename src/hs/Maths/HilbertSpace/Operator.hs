@@ -1,15 +1,28 @@
-module Maths.HilbertSpace.Operator where
+module Maths.HilbertSpace.Operator
+(   Operator
 
-import           Data.Composition
-import           Data.List
+,   opRows
+,   opElems
+,   opElem
+
+,   (.|><|)
+,   (|><|>)
+,   (|><|)
+,   (|><|><|)
+
+,   trace
+,   diag
+,   offDiag
+,   reverseCols
+) where
+
+import           Data.List                       (transpose)
 
 import           GHC.Data.Maybe
 
 import           Maths.HilbertSpace.Distribution
 import           Maths.HilbertSpace.Ket
 import           Maths.HilbertSpace.Scalar
-
-import           Safe
 
 import           QState
 import           QState.Units
@@ -41,13 +54,13 @@ instance Num Operator where
       negate        = opmap negate
       (+)           = liftOp2 (+)
       (*)           = (|><|><|)
-      fromInteger i = Operator Nothing Nothing
-                    $ map ((*fromInteger i) . ithKet) [0..]
+      fromInteger n = Operator Nothing Nothing
+                    $ map ((*fromInteger n) . ithKet) [0..]
       abs           = opmap abs
       signum        = opmap signum
 
 instance Show Operator where
-    show (Operator _  Nothing  es)      = error "showing operator without basis"
+    show (Operator _  Nothing  _ )      = error "showing operator without basis"
     show (Operator _ (Just bo) es)
         | any (isNothing . ketBasis) es = error "showing operator without basis"
         | otherwise                     = unlines $ zipWith showCol bo es
@@ -58,7 +71,7 @@ instance Show Operator where
 
 
 opRows :: Operator -> [Ket]
-opRows op = map (Ket (opBasisUnitOuter op) (opBasisOuter op))
+opRows op = map (ket (opBasisUnitOuter op) (opBasisOuter op))
                                         . transpose . map ketElems $ opCols op
 
 opElems :: Operator -> [[Scalar]]
@@ -101,7 +114,7 @@ o|><|><|o' = let mut =            opBasisUnitOuter o'
         getCol :: Int -> Ket
         getCol c = let mut =            opBasisUnitOuter o
                        b   = fromJust $ opBasisOuter o
-                    in Ket mut (Just b) ((`getElem`c)`map`[0..length b-1])
+                    in ket mut (Just b) ((`getElem`c)`map`[0..length b-1])
 
         getElem :: Int -> Int -> Scalar
         getElem r c = sum $ zipWith (*) (map ketElems (opRows o )!!r)
@@ -116,20 +129,20 @@ diag :: Operator -> [Scalar]
 diag = diagRec 0 . map ketElems . opCols
     where
         diagRec :: Int -> [[Scalar]] -> [Scalar]
-        diagRec i (xs:xss) = xs!!i : diagRec (i+1) xss
-        diagRec _  _       = []
+        diagRec ind (xs:xss) = xs!!ind : diagRec (ind+1) xss
+        diagRec _    _       = []
 
 offDiag :: Operator -> Int -> [Scalar]
 offDiag o c
-    | c==0 = diag o
-    | c> 0 = offDiagRec 0 . map ketElems . drop c   $ opCols o
-    | c< 0 = offDiagRec 0 . map (drop c . ketElems) $ opCols o
+    | c==0      = diag o
+    | c> 0      = offDiagRec 0 . map ketElems . drop c   $ opCols o
+    | otherwise = offDiagRec 0 . map (drop c . ketElems) $ opCols o
     where
         offDiagRec :: Int -> [[Scalar]] -> [Scalar]
-        offDiagRec i (xs:xss)
-            | i>=length xs    = []
-            | otherwise       = xs!!i : offDiagRec (i+1) xss
-        offDiagRec _  _       = []
+        offDiagRec ind (xs:xss)
+            | ind>=length xs = []
+            | otherwise      = xs!!ind : offDiagRec (ind+1) xss
+        offDiagRec _  _      = []
 
 reverseCols :: Operator -> Operator
 reverseCols op = op{ opCols = reverse $ opCols op }

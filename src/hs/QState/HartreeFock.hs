@@ -1,4 +1,6 @@
-module QState.HartreeFock where
+module QState.HartreeFock
+(   getHFEnergy
+) where
 
 import           Data.Composition
 

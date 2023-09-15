@@ -1,6 +1,17 @@
-module QState.Units.Internal where
+module QState.Units.Internal
+(   Unit
+,   toGeneric
+,   toUnitFactor
+,   fromUnitFactor
 
-import           QState.Configure.Internal
+,   GenericUnit
+,   unitI
+
+,   to
+,   from
+
+,   UnitType(Energy,Time)
+) where
 
 
 class Unit a where
@@ -18,7 +29,7 @@ class Unit a where
     fromUnitFactor u = 1/  toUnitFactor u
 
 
-data GenericUnit = GenericUnit { fact :: Double } deriving(Show)
+data GenericUnit = GenericUnit { fact_ :: Double } deriving(Show)
 
 instance Unit GenericUnit where
     toGeneric                       = id

@@ -1,6 +1,15 @@
-module QState.Coherence.Internal where
+module QState.Coherence.Internal
+(   Coherence(All,None,Angular,Spin)
+,   addKappasCoherently
 
-import           Data.List
+,   coherent
+,   coherent1ph
+,   coherent2ph
+
+,   kappasByCoherence
+) where
+
+import           Data.List                 (partition)
 
 import           Maths.QuantumNumbers
 

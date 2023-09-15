@@ -1,3 +1,4 @@
+-- {-# #-}jkjjkjg
 module QState.TwoPhoton.Internal
 (   energyRPA
 ,   energyFin
@@ -5,8 +6,6 @@ module QState.TwoPhoton.Internal
 ,   mElement
 ) where
 
-import           Data.Composition
-import           Data.List
 import           Data.Maybe
 
 import           Maths.HilbertSpace
@@ -14,10 +13,7 @@ import           Maths.QuantumNumbers
 import           Maths.WignerSymbol
 
 import           QState.Configure
-import           QState.Energy.Internal
 import           QState.FilePath.Internal
-import           QState.HartreeFock.Internal
-import           QState.Utility.Internal
 
 
 fileLines :: FilePath -> CDict -> IO [String]
@@ -30,7 +26,7 @@ fileCol file col cDict = map ((!!col) . words)<$>fileLines file cDict
 readFileLines :: Read a => FilePath -> CDict -> IO [a]
 readFileLines file cDict = map read<$>fileLines file cDict
 
-readFileColIndex :: (Num a,Read a) => FilePath -> Int -> CDict -> IO [a]
+readFileColIndex :: Read a => FilePath -> Int -> CDict -> IO [a]
 readFileColIndex file col cDict = map read<$>fileCol file col cDict
 
 readFileColKappa :: (Num a,Read a) => FilePath -> QNum -> QNum -> QNum -> CDict
@@ -69,9 +65,10 @@ mElementPrimitive kappa0 n0 kappa1 kappa2 eFinalIndex = (filterLines<$>)
                         . readFileColKappa mElemFilePath kappa0 kappa1 kappa2
     where
         filterLines :: [a] -> [a]
+        filterLines    []  = error "file empty"
         filterLines (x:xs) = everyFifth (x:x:xs)
-            where everyFifth xs = case drop 4 xs of x:xs' -> x : everyFifth xs'
-                                                    []    -> []
+            where everyFifth x_s = case drop 4 x_s of x_:x_s' -> x_ : everyFifth x_s'
+                                                      []      -> []
 
         mElemFilePath = "m_elements_eF"++show eFinalIndex++"_"++show kappa0
                                   ++"_"++show (nthKappaElevel kappa0 n0)
@@ -80,6 +77,8 @@ mElement :: QNum -> QNum -> QNum -> QNum -> QNum -> Int -> CDict -> IO [Scalar]
 mElement kappa0 n0 kappa1 kappa2 mJ eFinalIndex cDict = map (*fact)
         <$>mElementPrimitive kappa0 n0 kappa1 kappa2 eFinalIndex cDict
     where
-        [j0,j1,j2] = map jFromKappa [kappa0,kappa1,kappa2]
+        j0 = jFromKappa kappa0
+        j1 = jFromKappa kappa1
+        j2 = jFromKappa kappa2
         fact = wigner3j j2 1 j1 (-mJ) 0 mJ * wigner3j j1 1 j0 (-mJ) 0 mJ
              * (-1)**scalarFromQNum(j2+j1-2*mJ)

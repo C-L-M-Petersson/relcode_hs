@@ -1,4 +1,15 @@
-module QState.Configure.Internal where
+{-# OPTIONS_GHC -Wno-incomplete-uni-patterns #-}
+module QState.Configure.Internal
+(   CDict
+,   loadCDict
+
+,   cDictReadOption
+,   cDictReadOptionSafe
+,   cDictOption
+,   cDictOptionSafe
+,   readOptionVal
+,   cDictInsertOption
+) where
 
 import           Data.Char
 import           Data.Functor
@@ -12,7 +23,7 @@ import           System.Environment
 import           Text.Printf
 
 
-newtype CDict = CDict { cDictMap :: M.Map String String }
+newtype CDict = CDict { cDictMap_ :: M.Map String String }
 
 
 instance Show CDict where
@@ -38,7 +49,7 @@ loadCDict = CDict . M.fromList <$> ((++)<$>getCDictFileKVs<*>getArgKVs)
                     | null xs                = [(x,"")]
                     | take 2 (head xs)=="--" =  (x,"")     :toKeyVals xs
                     | otherwise              =  (x,head xs):toKeyVals (tail xs)
-                toKeyVals (x:xs)             =              toKeyVals xs
+                toKeyVals (_:xs)             =              toKeyVals xs
                 toKeyVals []                 = []
 
                 args :: [String] ->  [String]
@@ -47,8 +58,8 @@ loadCDict = CDict . M.fromList <$> ((++)<$>getCDictFileKVs<*>getArgKVs)
                     | head x=='"' = x':xs'
                     | otherwise   = x :args xs
                     where
-                        (x',xs') = (\(xs,y:ys) -> (unwords $ x:xs++[y],ys))
-                                 $ break ((=='"') . last) xs
+                        (x',xs') = (\(xs_,y:ys) -> (unwords $ x:xs_++[y],ys))
+                                   $ break ((=='"') . last) xs
 
 
         getCDictFileKVs :: IO [(String,String)]
@@ -67,7 +78,7 @@ loadCDict = CDict . M.fromList <$> ((++)<$>getCDictFileKVs<*>getArgKVs)
         removeComments            ""  = ""
         removeComments ('\\':'\\':xs) = '\\':removeComments xs
         removeComments ('\\':'#' :xs) = '#' :removeComments xs
-        removeComments (     '#' :xs) = ""
+        removeComments (     '#' :_ ) = ""
         removeComments (      x  :xs) =  x  :removeComments xs
 
         trim :: String -> String
@@ -86,11 +97,11 @@ cDictOption k = fromMaybe (error $ "option "++k++" not passed")
               . cDictOptionSafe k
 
 cDictOptionSafe :: String -> CDict -> Maybe String
-cDictOptionSafe k = M.lookup k . cDictMap
+cDictOptionSafe k = M.lookup k . cDictMap_
 
 readOptionVal :: Read a => String -> String -> a
 readOptionVal k v = let mrv = readMay v in fromMaybe
     (error $ "value "++v++" of option "++k++" can not be read") mrv
 
 cDictInsertOption :: String -> String -> CDict -> CDict
-cDictInsertOption k v cDict = cDict{ cDictMap = M.insert k v $ cDictMap cDict }
+cDictInsertOption k v cDict = cDict{ cDictMap_ = M.insert k v$cDictMap_ cDict }

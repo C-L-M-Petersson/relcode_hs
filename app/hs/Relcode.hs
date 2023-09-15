@@ -3,8 +3,6 @@ module Main (main) where
 import           Experiment.CrossSections
 import           Experiment.KRAKEN
 
-import           QState
-import           QState.Configure
 import           QState.Run
 
 

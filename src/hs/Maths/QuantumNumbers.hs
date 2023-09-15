@@ -15,8 +15,6 @@ module Maths.QuantumNumbers
 ,   mValues
 ) where
 
-import           Data.Composition
-
 import           Maths.QuantumNumbers.Error
 import           Maths.QuantumNumbers.Internal (QNum, intFromQNum,
                                                 doubleFromQNum,scalarFromQNum)
@@ -36,10 +34,8 @@ nthKappaElevel :: QNum -> QNum -> QNum
 nthKappaElevel kappa n = checkKappaN kappa n $ n-I.lFromKappa kappa
 
 
-
 reachableKappas :: QNum -> [QNum]
 reachableKappas kappa = checkKappa kappa $ I.reachableKappas kappa
-
 
 
 mValues :: QNum -> [QNum]

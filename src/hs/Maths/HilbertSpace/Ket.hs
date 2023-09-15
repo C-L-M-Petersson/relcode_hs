@@ -1,30 +1,41 @@
-module Maths.HilbertSpace.Ket where
+module Maths.HilbertSpace.Ket
+(   Ket
 
-import           Control.Applicative             hiding ((<|>))
+,   ket
+,   ketNullBasis
+,   ithKet
 
-import           Data.List
+,   ketBasisUnit
+,   ketBasis
+,   ketElems
+
+,   (<|)
+,   (.|>)
+,   (<|>)
+,   (|>|>)
+) where
+
+import           Data.List                       (intercalate)
 
 import           GHC.Data.Maybe
 
 import           Maths.HilbertSpace.Distribution
 import           Maths.HilbertSpace.Scalar
 
-import           Safe
-
 import           QState
 import           QState.Units
 
 
-data Ket = Ket { ketBasisUnit :: Maybe UnitType
-               , ketBasis     :: Maybe [Double]
-               , ketElems     :: [Scalar]
+data Ket = Ket { ketBasisUnit_ :: Maybe UnitType
+               , ketBasis_     :: Maybe [Double]
+               , ketElems_     :: [Scalar]
                }
 
 instance Distributed Ket where
     norm2      k = assertReal(k<|>k)
     scale        = (.|>) . fromReal
     basis        = ketBasis
-    setBasis b k = k{ ketBasis = b }
+    setBasis b k = k{ ketBasis_ = b }
 
 instance HasUnit Ket where
     unitType = ketBasisUnit
@@ -44,29 +55,39 @@ instance Num Ket where
       signum      = kmap signum
 
 instance Show Ket where
-    show (Ket Nothing   Nothing  es) = ("|"++) . (++">") . intercalate ","
-                                     $ map show es
-    show (Ket _         (Just b) es) = unlines $ zipWith showElem b es
-        where showElem b e = unwords $ map show [b,absVal e,phase e]
+    show (Ket _ Nothing  es) = ("|"++) . (++">") . intercalate ","
+                             $ map show es
+    show (Ket _ (Just b) es) = unlines $ zipWith showElem b es
+        where showElem b_ e = unwords $ map show [b_,absVal e,phase e]
 
 
+ket :: Maybe UnitType -> Maybe [Double] -> [Scalar] -> Ket
+ket = Ket
 
-ket :: [Scalar] -> Ket
-ket = Ket Nothing Nothing
+ketNullBasis :: [Scalar] -> Ket
+ketNullBasis = Ket Nothing Nothing
 
 ithKet :: Int -> Ket
-ithKet i = Ket Nothing Nothing (replicate i 0++[1]++repeat 0)
+ithKet ind = Ket Nothing Nothing (replicate ind 0++[1]++repeat 0)
 
+
+ketBasisUnit :: Ket -> Maybe UnitType
+ketBasisUnit = ketBasisUnit_
+
+ketBasis :: Ket -> Maybe [Double]
+ketBasis = ketBasis_
+
+ketElems :: Ket -> [Scalar]
+ketElems = ketElems_
 
 
 kmap :: (Scalar -> Scalar) -> Ket -> Ket
-kmap f k = k{ ketElems = f`map`ketElems k }
+kmap f k = k{ ketElems_ = f`map`ketElems k }
 
 liftKet2 :: (Scalar -> Scalar -> Scalar) -> Ket -> Ket -> Ket
 liftKet2 f (Ket uT mB es) (Ket uT' mB' es') = Ket (uT`firstJust`uT')
                                                   (mB`firstJust`mB')
                                                   (zipWith f es es')
-
 
 
 (<|) :: Ket -> Ket

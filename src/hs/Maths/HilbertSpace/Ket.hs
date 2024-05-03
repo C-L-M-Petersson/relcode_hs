@@ -9,6 +9,9 @@ module Maths.HilbertSpace.Ket
 ,   ketBasis
 ,   ketElems
 
+,   kmap
+,   kzip
+
 ,   (<|)
 ,   (.|>)
 ,   (<|>)
@@ -39,12 +42,17 @@ instance Distributed Ket where
 
 instance HasUnit Ket where
     unitType = ketBasisUnit
-    toUnits (Ket (Just ut) (Just b) es)   = flip (Ket (Just ut)) es
-                                          . Just . (`map`b) . to  <$>getUnit ut
-    toUnits  k                            = return k
-    fromUnits (Ket (Just ut) (Just b) es) = flip (Ket (Just ut)) es
-                                          . Just . (`map`b) . from<$>getUnit ut
-    fromUnits  k                          = return k
+    toUnits   (Ket mUT mB es) = Ket mUT<$>mB'<*>mapM toUnits   es
+        where mB' = if isJust mUT&&isJust mB
+                        then Just . (`map`fromJust mB) . to
+                                                    <$>getUnit (fromJust mUT)
+                        else return mB
+    fromUnits (Ket mUT mB es) = Ket mUT<$>mB'<*>mapM fromUnits es
+        where mB' = if isJust mUT&&isJust mB
+                        then Just . (`map`fromJust mB) . from
+                                                    <$>getUnit (fromJust mUT)
+                        else return mB
+    setUnit ut k              = k{ ketBasisUnit_ = Just ut }
 
 instance Num Ket where
       negate      = kmap negate
@@ -83,6 +91,9 @@ ketElems = ketElems_
 
 kmap :: (Scalar -> Scalar) -> Ket -> Ket
 kmap f k = k{ ketElems_ = f`map`ketElems k }
+
+kzip :: (Scalar -> Scalar -> Scalar) -> Ket -> Ket -> Ket
+kzip = liftKet2
 
 liftKet2 :: (Scalar -> Scalar -> Scalar) -> Ket -> Ket -> Ket
 liftKet2 f (Ket uT mB es) (Ket uT' mB' es') = Ket (uT`firstJust`uT')

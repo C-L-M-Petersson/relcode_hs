@@ -2,6 +2,8 @@ module QState.TwoPhoton
 (   getEnergyRPA
 ,   getEnergyFin
 
+,   getIROmegas
+
 ,   getMElement
 ,   getMElements
 ) where
@@ -21,6 +23,10 @@ getEnergyRPA = withCDictM.:energyRPA
 
 getEnergyFin :: QNum -> QNum -> Int -> QState [Double]
 getEnergyFin = withCDictM.:.energyFin
+
+
+getIROmegas :: Int -> QState [Double]
+getIROmegas = withCDictM . irOmegas
 
 
 getMElement :: QNum -> QNum -> QNum -> QNum -> QNum -> Int -> QState [Scalar]

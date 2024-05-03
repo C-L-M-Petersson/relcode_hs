@@ -15,6 +15,8 @@ module Maths.QuantumNumbers.Internal
 ,   reachableKappas
 ) where
 
+import           Data.AEq
+
 import           Maths.HilbertSpace.Scalar
 
 
@@ -26,12 +28,12 @@ instance Fractional QNum where
     QNum b False/QNum 2 False = QNum (b`div`2) (odd b)
     _           /_            = errNonHalfInteger
     fromRational r
-        | abs(r-floored    )<lim = QNum (floor r) False
-        | abs(r-floored-1/2)<lim = QNum (floor r) True
-        | otherwise              = errNonHalfInteger
+        | d~==floored     = QNum (round r) False
+        | d~==floored+1/2 = QNum (round r) True
+        | otherwise       = errNonHalfInteger
         where
             floored = fromInteger(floor r)
-            lim     = 1e-3
+            d = fromRational r :: Double
 
 instance Num QNum where
     QNum b h+QNum b' h'

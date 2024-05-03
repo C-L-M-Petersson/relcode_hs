@@ -1,5 +1,6 @@
 module Maths.WignerSymbol
 (   wigner3j
+,   clebschGordan
 ) where
 
 
@@ -18,5 +19,11 @@ sixValuesSymbol symbol qN00 qN01 qN02 qN10 qN11 qN12 = fromReal $ symbol
 
 
 wigner3j :: QNum -> QNum -> QNum -> QNum -> QNum -> QNum -> Scalar
-wigner3j j1 j2 j3 m1 m2 m3 = sixValuesSymbol WignerSymbols.wigner3j j1 j2 j3
-                                                                    m1 m2 m3
+wigner3j j1 j2 j3
+         m1 m2 m3 = sixValuesSymbol WignerSymbols.wigner3j j1 j2 j3
+                                                           m1 m2 m3
+
+clebschGordan :: QNum -> QNum -> QNum -> QNum -> QNum -> QNum -> Scalar
+clebschGordan j1 m1 j2 m2
+                    j  m  = sixValuesSymbol WignerSymbols.clebschGordan j1 j2 j
+                                                                        m1 m2 m

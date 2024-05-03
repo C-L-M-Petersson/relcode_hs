@@ -1,17 +1,25 @@
 module QState.OnePhoton
-(   getOmegas
-,   getEkins
-,   getAmps
+(   getEs
+,   getOmegas
+,   getEkin
+
+,   getAmp
+,   getPCur
 ,   getPhaseF
 ,   getPhaseG
 
+,   getWaveNumbers
+
 ,   getMatElem
 ,   getMatElems
+
+,   getExcitedState
 
 ,   getInterpolatedExcitedStateByOmega
 ,   getInterpolatedExcitedStateByEkin
 ) where
 
+import           Control.Lens
 import           Control.Monad
 
 import           Data.Composition
@@ -24,22 +32,36 @@ import           QState
 import           QState.Energy
 import           QState.HartreeFock
 import           QState.OnePhoton.Internal
+import           QState.Units.Internal
+import           QState.PertWave
 
+
+getEs :: QNum -> QNum -> QState [Double]
+getEs kappa0 n0 = join $ selectOutputEGrid<$>getOmegas kappa0 n0
+                                          <*>getEkin   kappa0 n0
 
 getOmegas :: QNum -> QNum -> QState [Double]
 getOmegas = withCDictM.:omegas
 
-getEkins :: QNum -> QNum -> QState [Double]
-getEkins kappa0 n0 = map . (+)<$>getHFEnergy kappa0 n0<*>getOmegas kappa0 n0
+getEkin :: QNum -> QNum -> QState [Double]
+getEkin kappa0 n0 = map . (+)<$>getHFEnergy kappa0 n0<*>getOmegas kappa0 n0
 
-getAmps   :: QNum -> QNum -> QNum -> QState [Double]
-getAmps   = withCDictM.:.amps
+
+getAmp   :: QNum -> QNum -> QNum -> QState [Double]
+getAmp   = withCDictM.:.amps
+
+getPCur   :: QNum -> QNum -> QNum -> QState [Double]
+getPCur   = withCDictM.:.pCurs
 
 getPhaseF :: QNum -> QNum -> QNum -> QState [Double]
 getPhaseF = withCDictM.:.phaseF
 
 getPhaseG :: QNum -> QNum -> QNum -> QState [Double]
 getPhaseG = withCDictM.:.phaseG
+
+
+getWaveNumbers :: QNum -> QNum -> QState [Double]
+getWaveNumbers kappa0 n0 = getEkin kappa0 n0>>=waveNumberEs
 
 
 getMatElem :: QNum -> QNum -> QNum -> QState [Scalar]
@@ -53,6 +75,9 @@ getMatElems (kappa0:kappas0) (n0:ns0) kappas1 = zipWith (+)
 getMatElems _                 _        _      = error
     "inconsistent number of kappa- and n ground state quantum numbers provided"
 
+
+getExcitedState :: QNum -> QNum -> [Scalar] -> QState Ket
+getExcitedState kappa0 n0 = (ket (Just Energy) . Just<$>getEs kappa0 n0??)
 
 getInterpolatedExcitedStateByOmega :: [QNum] -> [QNum] -> [QNum] -> QState Ket
 getInterpolatedExcitedStateByOmega kappas0 ns0 kappas1 = join $

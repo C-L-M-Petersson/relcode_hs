@@ -1,5 +1,5 @@
 module QState.Units.Energy
-(   EnergyUnit(AU,EV)
+(   EnergyUnit(..)
 ) where
 
 import           QState.Units.Internal

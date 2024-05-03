@@ -1,5 +1,5 @@
 module Experiment.CrossSections
-(   crossSections1ph
+(   crossSection1ph
 ) where
 
 

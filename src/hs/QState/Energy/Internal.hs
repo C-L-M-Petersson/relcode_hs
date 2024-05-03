@@ -10,6 +10,8 @@ module QState.Energy.Internal
 ,   xuv
 ,   xuvKet
 
+,   energyKet
+
 ,   nEs
 ,   eGridMin
 ,   eGridMax
@@ -58,6 +60,10 @@ xuv eu cDict omega = case (cDictReadOption "pulseType" cDict) of
 
 xuvKet :: [Double] -> EnergyUnit -> CDict -> Ket
 xuvKet os eu cDict = ket (Just Energy) (Just os) (xuv eu cDict`map`os)
+
+
+energyKet :: [Double] -> [Scalar] -> Ket
+energyKet es cs = ket (Just Energy) (Just es) cs
 
 
 

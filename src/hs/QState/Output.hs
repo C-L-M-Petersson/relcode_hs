@@ -1,5 +1,6 @@
 module QState.Output
 (   printQState
+,   printQStateWithUnits
 ,   putStrQState
 ,   putStrLnQState
 
@@ -18,9 +19,11 @@ import           QState.FilePath
 import           QState.Units
 
 
-
 printQState :: Show a => a -> QState()
 printQState = liftIO . print
+
+printQStateWithUnits :: (HasUnit a,Show a) => a -> QState()
+printQStateWithUnits x = toUnits x>>=printQState
 
 putStrQState :: String -> QState()
 putStrQState = liftIO . putStr

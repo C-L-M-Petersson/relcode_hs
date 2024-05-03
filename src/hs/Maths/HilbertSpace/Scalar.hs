@@ -10,6 +10,7 @@ module Maths.HilbertSpace.Scalar
 ,   toImag
 ,   absVal
 ,   Maths.HilbertSpace.Scalar.phase
+,   scalarPhase
 
 ,   assertReal
 ,   assertImag
@@ -18,18 +19,23 @@ module Maths.HilbertSpace.Scalar
 ) where
 
 import           Data.Complex
+import           Data.Composition
 import           Data.List       (intercalate)
 import           Data.List.Split
 import           Data.List.Tools
+import           Data.Maybe
+
+import           QState
+import           QState.Units
 
 
-newtype Scalar = Scalar { val_ :: Complex Double }
-
-instance Eq Scalar where
-    s==s' = val_ s==val_ s'
+data Scalar = Scalar
+              { scalarUnit_ :: Maybe UnitType
+              , val_        :: Complex Double
+              } deriving(Eq)
 
 instance Floating Scalar where
-        pi    = Scalar pi
+        pi    = Scalar Nothing pi
         exp   = smap exp
         log   = smap log
         sqrt  = smap sqrt
@@ -47,13 +53,25 @@ instance Floating Scalar where
 
 instance Fractional Scalar where
     (/)          = liftScalar (/)
-    fromRational = Scalar . fromRational
+    fromRational = Scalar Nothing . fromRational
+
+instance HasUnit Scalar where
+    unitType = scalarUnit_
+    toUnits   (Scalar (Just ut) v) = let (r:+i) = v
+                                      in (\f -> Scalar (Just ut) (f r:+f i))
+                                                            . to  <$>getUnit ut
+    toUnits    s                   = return s
+    fromUnits (Scalar (Just ut) v) = let (r:+i) = v
+                                      in (\f -> Scalar (Just ut) (f r:+f i))
+                                                            . from<$>getUnit ut
+    fromUnits  s                   = return s
+    setUnit ut (Scalar _ v) = Scalar (Just ut) v
 
 instance Num Scalar where
     negate      = smap negate
     (+)         = liftScalar (+)
     (*)         = liftScalar (*)
-    fromInteger = Scalar . fromInteger
+    fromInteger = Scalar Nothing . fromInteger
     abs         = smap abs
     signum      = smap signum
 
@@ -64,14 +82,14 @@ instance Ord Scalar where
 instance Read Scalar where
     readsPrec _ str         = [(readHead,strTail)]
         where
-            readHead = Scalar . uncurry (:+) . read
+            readHead = Scalar Nothing . uncurry (:+) . read
                      $ takeUntil (==')') str'
             strTail  = dropUntil (==')') str'
             str' = let replace from to = intercalate to . splitOn from
                     in replace "NaN" "0" str
 
 instance Show Scalar where
-    show (Scalar (r:+i_))
+    show (Scalar _ (r:+i_))
         | r ==0&&i_==0 = "0"
         | r ==0        =              show i_++"i"
         | i_==0        = show r
@@ -79,25 +97,32 @@ instance Show Scalar where
         | otherwise    = show r++"+"++show i_++"i"
 
 
-
 smap :: (Complex Double -> Complex Double) -> Scalar -> Scalar
-smap f = Scalar . f . val_
+smap f (Scalar sU v) = Scalar sU (f v)
 
 liftScalar :: (Complex Double -> Complex Double -> Complex Double) -> Scalar
                                                             -> Scalar -> Scalar
-liftScalar f (Scalar v) (Scalar v') = Scalar (f v v')
+liftScalar f (Scalar Nothing v) (Scalar Nothing v') = Scalar Nothing (f v v')
+liftScalar f (Scalar mUT     v) (Scalar Nothing v') = Scalar mUT     (f v v')
+liftScalar f (Scalar Nothing v) (Scalar mUT'    v') = Scalar mUT'    (f v v')
+liftScalar f (Scalar mUT     v) (Scalar mUT'    v')
+    | mUT==mUT'                                     = Scalar mUT     (f v v')
+    | otherwise                                     = error
+        $ "can not add scalar of dimension "++show (fromJust mUT )
+                                   ++" and "++show (fromJust mUT')
 
 
+fromRealImag :: Double -> Double -> Scalar
+fromRealImag = Scalar Nothing .: (:+)
 
 fromReal :: Double -> Scalar
-fromReal = Scalar . (:+0)
+fromReal = Scalar Nothing . (:+0)
 
 fromImag :: Double -> Scalar
-fromImag = Scalar . (0:+)
+fromImag = Scalar Nothing . (0:+)
 
 i :: Double -> Scalar
 i = fromImag
-
 
 
 toReal :: Scalar -> Double
@@ -112,16 +137,17 @@ absVal = magnitude . val_
 phase :: Scalar -> Double
 phase = Data.Complex.phase . val_
 
+scalarPhase :: Scalar -> Scalar
+scalarPhase = fromReal . Data.Complex.phase . val_
 
 
 assertReal :: Scalar -> Double
-assertReal (Scalar (r:+0 )) = r
-assertReal  s               = error $ "scalar "++show s++" not real"
+assertReal (Scalar _ (r:+0 )) = r
+assertReal  s                 = error $ "scalar "++show s++" not real"
 
 assertImag :: Scalar -> Double
-assertImag (Scalar (0:+i_)) = i_
-assertImag  s               = error $ "scalar "++show s++" not imaginary"
-
+assertImag (Scalar _ (0:+i_)) = i_
+assertImag  s                 = error $ "scalar "++show s++" not imaginary"
 
 
 conj :: Scalar -> Scalar

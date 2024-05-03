@@ -1,5 +1,9 @@
+{-# LANGUAGE LambdaCase #-}
 module QState.Energy
-(   getXUV
+(   OutputEnergyGrid(..)
+,   selectOutputEGrid
+
+,   getXUV
 ,   getXUVKetOnGrid
 ,   getXUVKet
 ,   getInterpolatedXUVKet
@@ -17,10 +21,20 @@ module QState.Energy
 
 import           Maths.HilbertSpace
 import           Maths.Interpolate
+import           Maths.QuantumNumbers
 
 import           QState
+import           QState.Configure
 import           QState.Energy.Internal
 import           QState.Units.Internal
+
+
+data OutputEnergyGrid = Omega | EKin deriving(Read,Show)
+
+selectOutputEGrid :: a -> a -> QState a
+selectOutputEGrid omegaGrid eKinGrid = getReadOption "outPutEGrid">>= \case
+    Omega -> return omegaGrid
+    EKin  -> return eKinGrid
 
 
 getXUV :: QState Pulse
@@ -40,7 +54,6 @@ getInterpolatedXUVKet = (e_s<$>getOmegasXUV<*>getNEs)>>=getXUVKetOnGrid
                         in takeWhile (<e_Max) $ map ((+e_Min) . (*de_)) [0..]
 
 
-
 getNEs :: QState Int
 getNEs = withCDict nEs
 
@@ -54,13 +67,11 @@ getEGrid :: QState [Double]
 getEGrid = withCDict . eGrid=<<getEnergyUnit
 
 
-
 interpolateEnergyKet :: Ket -> QState Ket
 interpolateEnergyKet = (<$>getNEs) . flip changeKetGridSize
 
 energyKetToEGrid :: Ket -> QState Ket
 energyKetToEGrid k = (`interpolateKet`k)<$>(getEnergyUnit>>=withCDict . eGrid)
-
 
 
 interpolatedExcitedState :: [Double] -> [Scalar] -> QState Ket

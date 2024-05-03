@@ -43,4 +43,3 @@ mValues qN = let mValuesRec m
                     | m==qN     = [m]
                     | otherwise =  m : mValuesRec (m+1)
               in mValuesRec (-qN)
-

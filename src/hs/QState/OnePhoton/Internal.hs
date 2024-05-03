@@ -1,6 +1,7 @@
 module QState.OnePhoton.Internal
 (   omegas
 ,   amps
+,   pCurs
 ,   phaseF
 ,   phaseG
 
@@ -13,9 +14,10 @@ import           Maths.HilbertSpace
 import           Maths.QuantumNumbers
 
 import           QState.Configure
+import           QState.Configure.Internal
 import           QState.FilePath.Internal
 import           QState.HartreeFock.Internal
-import           QState.Utility.Internal
+import           QState.PertWave.Internal
 
 
 fileLines :: FilePath -> QNum -> QNum -> CDict -> IO [String]
@@ -57,6 +59,9 @@ eKins kappa0 n0 cDict = do
 amps :: QNum -> QNum -> QNum -> CDict -> IO [Double]
 amps = readFileColKappa "/amp_all"
 
+pCurs :: QNum -> QNum -> QNum -> CDict -> IO [Double]
+pCurs = readFileColKappa "/pcur_all"
+
 phaseF :: QNum -> QNum -> QNum -> CDict -> IO [Double]
 phaseF = readFileColKappa "/phaseF_all"
 
@@ -68,6 +73,7 @@ matElem :: QNum -> QNum -> QNum -> CDict -> IO [Scalar]
 matElem kappa0 n0 kappa1 cDict = map product . transpose
     <$>sequence [ map        fromReal <$>amps   kappa0 n0 kappa1 cDict
                 , map (exp . fromImag)<$>phaseF kappa0 n0 kappa1 cDict
-                , map (exp . fromImag  . negate . coulombPhase kappa1)
+                , map (subtractedPhaseFactor kappa1 zEff)
                                       <$>eKins kappa0 n0 cDict
                 ]
+    where zEff = cDictReadOption "zEff" cDict

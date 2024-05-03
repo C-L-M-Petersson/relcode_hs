@@ -10,14 +10,18 @@ module QState
 ,   getUnit
 ,   getEnergyUnit
 ,   getTimeUnit
+,   getDelayUnit
 
 ,   getOmegasXUV
 ) where
 
+import           Control.Lens
 import           Control.Monad.State
 
 import           QState.Configure.Internal
 import           QState.Internal
+import           QState.Units.CrossSec
+import           QState.Units.Delay
 import           QState.Units.Energy
 import           QState.Units.Internal
 import           QState.Units.Time
@@ -36,14 +40,22 @@ withCDictM x = liftIO . x=<<getCDict
 
 
 getUnit :: UnitType -> QState GenericUnit
-getUnit Energy = toGeneric<$>getEnergyUnit
-getUnit Time   = toGeneric<$>getTimeUnit
+getUnit  CrossSec     = toGeneric<$> getCrossSecUnit
+getUnit (Delay omega) = toGeneric<$>(getDelayUnit??omega)
+getUnit  Energy       = toGeneric<$> getEnergyUnit
+getUnit  Time         = toGeneric<$> getTimeUnit
 
-getEnergyUnit :: QState EnergyUnit
-getEnergyUnit = gets eUnit_
+getCrossSecUnit :: QState CrossSecUnit
+getCrossSecUnit = gets csUnit_
 
-getTimeUnit :: QState TimeUnit
-getTimeUnit = gets tUnit_
+getEnergyUnit   :: QState EnergyUnit
+getEnergyUnit   = gets eUnit_
+
+getTimeUnit     :: QState TimeUnit
+getTimeUnit     = gets tUnit_
+
+getDelayUnit    :: QState (Double -> DelayUnit)
+getDelayUnit    = gets phiUnit_
 
 
 getOmegasXUV :: QState [Double]

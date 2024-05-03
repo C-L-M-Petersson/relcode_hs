@@ -30,7 +30,6 @@ getReadOptionSafe :: Read a => String -> QState (Maybe a)
 getReadOptionSafe = (<$>getCDict) . cDictReadOptionSafe
 
 
-
 withOptions :: [String] -> [String] -> QState a -> QState a
 withOptions (k:ks) (v:vs) s = withOption k v (withOptions ks vs s)
 withOptions  _      _     s = s

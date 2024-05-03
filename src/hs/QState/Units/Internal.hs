@@ -10,7 +10,7 @@ module QState.Units.Internal
 ,   to
 ,   from
 
-,   UnitType(Energy,Time)
+,   UnitType(..)
 ) where
 
 
@@ -46,4 +46,4 @@ from :: Unit a => a -> Double -> Double
 from u = (fromUnitFactor u*)
 
 
-data UnitType = Energy | Time
+data UnitType = CrossSec | Delay Double | Energy | Time deriving(Eq,Show)

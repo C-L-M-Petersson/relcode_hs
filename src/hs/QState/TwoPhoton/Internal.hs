@@ -3,17 +3,21 @@ module QState.TwoPhoton.Internal
 (   energyRPA
 ,   energyFin
 
+,   irOmegas
+
 ,   mElement
 ) where
 
+import           Data.Composition
 import           Data.Maybe
 
 import           Maths.HilbertSpace
 import           Maths.QuantumNumbers
 import           Maths.WignerSymbol
 
-import           QState.Configure
+import           QState.Configure.Internal
 import           QState.FilePath.Internal
+import           QState.PertWave
 
 
 fileLines :: FilePath -> CDict -> IO [String]
@@ -48,7 +52,6 @@ readFileColKappa file kappa0 kappa1 kappa2 cDict
             | otherwise                      = Nothing
 
 
-
 energyRPA :: QNum -> QNum -> CDict -> IO [Double]
 energyRPA kappa0 n0 = readFileLines
     $ "energy_rpa_"++show kappa0++"_"++show (nthKappaElevel kappa0 n0)
@@ -59,6 +62,13 @@ energyFin kappa0 n0 = readFileColIndex
     . subtract 1
 
 
+irOmegas :: Int -> CDict -> IO [Double]
+irOmegas eFinalIndex cDict = zipWith (-)<$>energyFin kappa0 n0 eFinalIndex cDict
+                                        <*>energyRPA kappa0 n0 cDict
+    where
+        kappa0 = head $ cDictReadOption "kappas0" cDict
+        n0     = head $ cDictReadOption "ns0"     cDict
+
 
 mElementPrimitive :: QNum -> QNum -> QNum -> QNum -> Int -> CDict -> IO [Scalar]
 mElementPrimitive kappa0 n0 kappa1 kappa2 eFinalIndex = (filterLines<$>)
@@ -66,16 +76,19 @@ mElementPrimitive kappa0 n0 kappa1 kappa2 eFinalIndex = (filterLines<$>)
     where
         filterLines :: [a] -> [a]
         filterLines    []  = error "file empty"
-        filterLines (x:xs) = everyFifth (x:x:xs)
-            where everyFifth x_s = case drop 4 x_s of x_:x_s' -> x_ : everyFifth x_s'
-                                                      []      -> []
+        filterLines (x:xs) = let everyFifth x_s = case drop 4 x_s of
+                                                x_:x_s' -> x_ : everyFifth x_s'
+                                                []      -> []
+                              in everyFifth (x:x:xs)
 
         mElemFilePath = "m_elements_eF"++show eFinalIndex++"_"++show kappa0
                                   ++"_"++show (nthKappaElevel kappa0 n0)
 
 mElement :: QNum -> QNum -> QNum -> QNum -> QNum -> Int -> CDict -> IO [Scalar]
-mElement kappa0 n0 kappa1 kappa2 mJ eFinalIndex cDict = map (*fact)
+mElement kappa0 n0 kappa1 kappa2 mJ eFinalIndex cDict = zipWith ((*fact).:(*))
         <$>mElementPrimitive kappa0 n0 kappa1 kappa2 eFinalIndex cDict
+        <*>(map (subtractedPhaseFactor kappa1 (cDictReadOption "zEff" cDict))
+                                    <$>energyFin kappa0 n0 eFinalIndex cDict)
     where
         j0 = jFromKappa kappa0
         j1 = jFromKappa kappa1

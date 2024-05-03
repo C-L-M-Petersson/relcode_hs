@@ -1,5 +1,5 @@
 module QState.Units.Time
-(   TimeUnit(AU,S,MS,US,NS,PS,FS,AS)
+(   TimeUnit(..)
 ) where
 
 import           QState.Units.Internal

@@ -44,7 +44,7 @@ getOmegas :: QNum -> QNum -> QState [Double]
 getOmegas = withCDictM.:omegas
 
 getEkin :: QNum -> QNum -> QState [Double]
-getEkin kappa0 n0 = map . (+)<$>getHFEnergy kappa0 n0<*>getOmegas kappa0 n0
+getEkin = withCDictM.:eKins
 
 
 getAmp   :: QNum -> QNum -> QNum -> QState [Double]

@@ -1,19 +1,19 @@
-module Experiment.RABITT.Common where
---(   whenRunRABITT
---
---,   forGroundStates
---,   forGroundStates_
---
---,   getSideBandEnergy
---
---,   savePhase
---
---,   toPhaseOrDelay
---
---,   ketAbsEmi
---,   ketAbs
---,   ketEmi
---) where
+module Experiment.RABITT.Common
+(   whenRunRABITT
+
+,   forGroundStates
+,   forGroundStates_
+
+,   getSideBandEnergy
+
+,   savePhase
+
+,   toPhaseOrDelay
+
+,   ketAbsEmi
+,   ketAbs
+,   ketEmi
+) where
 
 import           Control.Lens
 import           Control.Monad.Extra
@@ -52,7 +52,7 @@ getSideBandEnergy :: QNum -> QNum -> QState [Scalar]
 getSideBandEnergy kappa0 n0 = do
     irStepFraction <- getReadOption "IRStepFractionRABITT"
     getEs kappa0 n0>>=
-                      mapM (toUnits . setUnit Energy . fromReal) . drop irStepFraction
+        mapM (toUnits . setUnit Energy . fromReal) . drop irStepFraction
 
 
 savePhase :: (Show a,Show b) => String -> [a] -> [b] -> QState()

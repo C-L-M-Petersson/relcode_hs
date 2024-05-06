@@ -51,7 +51,8 @@ crossSectionPCurs kappa0 n0 kappas1 = sum
 crossSectionPCur :: QNum -> QNum -> QNum -> QState Ket
 crossSectionPCur kappa0 n0 kappa1 = getPCur kappa0 n0 kappa1
     >>=getExcitedState kappa0 n0
-                        . map (setUnit CrossSec . fromReal . (*(pi/3)) . negate)
+        . map (setUnit CrossSec . fromReal . (*(pi/3)) . negate)
+            >>=divE kappa0 n0
 
 
 crossSectionAmps :: QNum -> QNum -> [QNum] -> QState Ket
@@ -61,5 +62,9 @@ crossSectionAmps kappa0 n0 kappas1 = sum
 crossSectionAmp :: QNum -> QNum -> QNum -> QState Ket
 crossSectionAmp kappa0 n0 kappa1 = zipWith calc<$>getAmp kappa0 n0 kappa1
                                                <*>getWaveNumbers kappa0 n0
-                                                    >>=getExcitedState kappa0 n0
+                                >>=getExcitedState kappa0 n0>>=divE kappa0 n0
     where calc a k = setUnit CrossSec $ fromReal (2*pi/3*fsc*a**2*k)
+
+divE :: QNum -> QNum -> Ket -> QState Ket
+divE kappa0 n0 k = (`kmod`k) . zipWith (flip (/)) . map fromReal
+                                                        <$>getOmegas kappa0 n0

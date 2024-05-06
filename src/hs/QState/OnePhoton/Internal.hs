@@ -1,5 +1,6 @@
 module QState.OnePhoton.Internal
 (   omegas
+,   eKins
 ,   amps
 ,   pCurs
 ,   phaseF
@@ -12,6 +13,7 @@ import           Data.List                   (transpose)
 
 import           Maths.HilbertSpace
 import           Maths.QuantumNumbers
+import           Maths.WignerSymbol
 
 import           QState.Configure
 import           QState.Configure.Internal
@@ -54,6 +56,7 @@ eKins  :: QNum -> QNum -> CDict -> IO [Double]
 eKins kappa0 n0 cDict = do
     hfE <- hfEnergy kappa0 n0 cDict
     os  <- omegas   kappa0 n0 cDict
+
     return $ map (+hfE) os
 
 amps :: QNum -> QNum -> QNum -> CDict -> IO [Double]
@@ -70,10 +73,15 @@ phaseG = readFileColKappa "/phaseG_all"
 
 
 matElem :: QNum -> QNum -> QNum -> CDict -> IO [Scalar]
-matElem kappa0 n0 kappa1 cDict = map product . transpose
+matElem kappa0 n0 kappa1 cDict = map ((*w3j) . product) . transpose
     <$>sequence [ map        fromReal <$>amps   kappa0 n0 kappa1 cDict
                 , map (exp . fromImag)<$>phaseF kappa0 n0 kappa1 cDict
                 , map (subtractedPhaseFactor kappa1 zEff)
                                       <$>eKins kappa0 n0 cDict
                 ]
-    where zEff = cDictReadOption "zEff" cDict
+    where
+        zEff = cDictReadOption "zEff" cDict :: Double
+        w3j  = wigner3j   j0   1  j1
+                        (-1/2) 0 (1/2)
+        j0   = jFromKappa kappa0
+        j1   = jFromKappa kappa1

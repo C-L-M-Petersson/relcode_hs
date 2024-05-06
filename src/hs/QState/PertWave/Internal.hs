@@ -8,6 +8,7 @@ module QState.PertWave.Internal
 import           Control.Monad.Extra
 
 import           Data.Complex
+import           Data.Composition
 
 import           Math.SphericalHarmonics.AssociatedLegendre
 import           Maths.HilbertSpace
@@ -21,11 +22,10 @@ import           QState.PertWave.Relativistic    as Rel
 
 
 subtractedPhaseFactor :: QNum -> Double -> Double -> Scalar
-subtractedPhaseFactor kappa zEff eKin = exp . fromImag
-                                      $ subtractedPhase kappa zEff eKin
+subtractedPhaseFactor = exp . fromImag .:. subtractedPhase
 
 subtractedPhase :: QNum -> Double -> Double -> Double
-subtractedPhase kappa zEff eKin = -pi*l/2 - NonRel.coulombPhase kappa eKin zEff
+subtractedPhase kappa zEff eKin = -pi*l/2 - NonRel.coulombPhase kappa zEff eKin
     where l = doubleFromQNum $ lFromKappa kappa
 
 

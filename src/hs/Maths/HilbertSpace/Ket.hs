@@ -9,6 +9,7 @@ module Maths.HilbertSpace.Ket
 ,   ketBasis
 ,   ketElems
 
+,   kmod
 ,   kmap
 ,   kzip
 
@@ -89,8 +90,11 @@ ketElems :: Ket -> [Scalar]
 ketElems = ketElems_
 
 
+kmod :: ([Scalar] -> [Scalar]) -> Ket -> Ket
+kmod f k = k{ ketElems_ = f $ ketElems k }
+
 kmap :: (Scalar -> Scalar) -> Ket -> Ket
-kmap f k = k{ ketElems_ = f`map`ketElems k }
+kmap f = kmod (map f)
 
 kzip :: (Scalar -> Scalar -> Scalar) -> Ket -> Ket -> Ket
 kzip = liftKet2

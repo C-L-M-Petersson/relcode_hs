@@ -1,5 +1,6 @@
 module QState.Units.Time
 (   TimeUnit(..)
+,   auToAs
 ) where
 
 import           QState.Units.Internal
@@ -30,10 +31,14 @@ instance Read TimeUnit where
 
 instance Unit TimeUnit where
     toUnitFactor AU = 1
-    toUnitFactor S  = 24.188843265857*10**(-18)
-    toUnitFactor MS = 24.188843265857*10**(-15)
-    toUnitFactor US = 24.188843265857*10**(-12)
-    toUnitFactor NS = 24.188843265857*10**(-9)
-    toUnitFactor PS = 24.188843265857*10**(-6)
-    toUnitFactor FS = 24.188843265857*10**(-3)
-    toUnitFactor AS = 24.188843265857
+    toUnitFactor S  = auToAs*10**(-18)
+    toUnitFactor MS = auToAs*10**(-15)
+    toUnitFactor US = auToAs*10**(-12)
+    toUnitFactor NS = auToAs*10**(-9)
+    toUnitFactor PS = auToAs*10**(-6)
+    toUnitFactor FS = auToAs*10**(-3)
+    toUnitFactor AS = auToAs
+
+
+auToAs :: Double
+auToAs = 24.188843265857

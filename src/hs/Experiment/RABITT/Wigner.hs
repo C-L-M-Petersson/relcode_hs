@@ -6,13 +6,10 @@ module Experiment.RABITT.Wigner
 ,   calcWignerPhaseForQNums
 ) where
 
-import           Control.Monad.Extra
-
 import           Data.Composition
 import           Data.Maybe
 import           Data.Tuple.HT
 
-import           Experiment.CrossSections.OnePhoton
 import           Experiment.RABITT.Common
 
 import           Maths.HilbertSpace.Ket
@@ -36,9 +33,9 @@ calcAndSaveWignerPhaseForQNums kappa0 n0 kappas1 = withOptions
     irStepFraction <- getReadOption "IRStepFractionRABITT"
     es             <- getEs kappa0 n0>>=mapM toUnits
                         . map (setUnit Energy . fromReal) . drop irStepFraction
-    phase          <- calcWignerPhaseForQNums kappa0 n0 kappas1
+    wignerPhase    <- calcWignerPhaseForQNums kappa0 n0 kappas1
 
-    savePhase "Wigner" es phase
+    savePhase "Wigner" es wignerPhase
 
 
 calcWignerPhases :: QState [[Double]]

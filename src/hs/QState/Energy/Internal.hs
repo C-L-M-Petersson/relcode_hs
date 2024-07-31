@@ -23,7 +23,6 @@ import           Maths.HilbertSpace.Scalar
 
 import           QState.Configure.Internal
 import           QState.Units
-import           QState.Units.Internal
 
 
 type Pulse = Double -> Scalar

@@ -16,6 +16,7 @@ instance Show DelayUnit where
 instance Read (Double -> DelayUnit) where
     readsPrec _ ('r':'a':'d':str) = [(const Rad,str)]
     readsPrec _ ('a':'s'    :str) = [(AS       ,str)]
+    readsPrec _  str              = error $ "could not read delay unit "++str
 
 instance Unit DelayUnit where
     toUnitFactor  Rad       = 1

@@ -1,9 +1,9 @@
--- {-# #-}jkjjkjg
 module QState.TwoPhoton.Internal
 (   fileLines
 ,   readFileColIndex
 ,   filterBreakPoints
 
+,   phaseRPA
 ,   energyRPA
 ,   energyFin
 
@@ -12,7 +12,7 @@ module QState.TwoPhoton.Internal
 ,   mElement
 ) where
 
-import           Data.Composition
+import           Data.List                       (transpose)
 import           Data.Maybe
 
 import           Maths.HilbertSpace
@@ -93,6 +93,14 @@ irOmegas eFinalIndex cDict = zipWith (-)<$>energyFin kappa0 n0 eFinalIndex cDict
         n0     = head $ cDictReadOption "ns0"     cDict
 
 
+phaseFactorPrimitive :: QNum -> QNum -> QNum -> QNum -> Int -> CDict
+                                                                -> IO [Scalar]
+phaseFactorPrimitive kappa0 n0 kappa1 kappa2 eFinalIndex cDict = map (exp . i)
+        <$>readFileColKappa phaseFilePath kappa0 kappa1 kappa2 cDict
+    where
+        phaseFilePath = "phase_eF"++show eFinalIndex++"_"++show kappa0
+                             ++"_"++show (nthKappaElevel kappa0 n0)
+
 mElementPrimitive :: QNum -> QNum -> QNum -> QNum -> Int -> CDict -> IO [Scalar]
 mElementPrimitive kappa0 n0 kappa1 kappa2 eFinalIndex cDict =
         (`filterBreakPoints`cDict)
@@ -102,16 +110,19 @@ mElementPrimitive kappa0 n0 kappa1 kappa2 eFinalIndex cDict =
                                   ++"_"++show (nthKappaElevel kappa0 n0)
 
 mElement :: QNum -> QNum -> QNum -> QNum -> QNum -> Int -> CDict -> IO [Scalar]
-mElement kappa0 n0 kappa1 kappa2 mJ eFinalIndex cDict = zipWith ((*fact).:(*))
-        <$>mElementPrimitive kappa0 n0 kappa1 kappa2 eFinalIndex cDict
-        <*>(map (subtractedPhaseFactor kappa2 (cDictReadOption "zEff" cDict))
-                                    <$>energyFin kappa0 n0 eFinalIndex cDict)
-    where --TODO: Add phase
+mElement kappa0 n0 kappa1 kappa2 mJ eFinalIndex cDict = map ((fact*) . product)
+         . transpose<$>sequence
+            [ mElementPrimitive kappa0 n0 kappa1 kappa2 eFinalIndex cDict
+            , phaseFactorPrimitive kappa0 n0 kappa1 kappa2 eFinalIndex cDict
+            , map (subtractedPhaseFactor kappa2 (cDictReadOption "zEff" cDict))
+                                        <$>energyFin kappa0 n0 eFinalIndex cDict
+            ]
+    where
         j0 = jFromKappa kappa0
         j1 = jFromKappa kappa1
         j2 = jFromKappa kappa2
-        fact = wigner3j   j2  1 j1
-                        (-mJ) 0 mJ
-             * wigner3j   j1  1 j0
-                        (-mJ) 0 mJ
+        fact = wigner3j   j2  1  j1
+                        (-mJ) 0  mJ
+             * wigner3j   j1  1  j0
+                        (-mJ) 0  mJ
              * (-1)**scalarFromQNum(j2+j1-2*mJ)

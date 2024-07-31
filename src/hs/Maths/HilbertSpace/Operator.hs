@@ -49,6 +49,10 @@ instance HasUnit Operator where
         where mBO' = case (mUT,mBO) of
                 (Just ut,Just bo) -> Just . (`map`bo) . from<$>getUnit ut
                 _                 -> return mBO
+    setUnit ut op                   = op{ opBasisUnitOuter = Just ut
+                                        , opCols           = map (setUnit ut)
+                                                           $ opCols op
+                                        }
 
 instance Num Operator where
       negate        = opmap negate

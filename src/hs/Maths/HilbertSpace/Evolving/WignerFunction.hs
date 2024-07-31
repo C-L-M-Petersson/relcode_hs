@@ -17,7 +17,6 @@ import           Maths.HilbertSpace.Scalar
 import           QState
 import           QState.Time
 import           QState.Units
-import           QState.Units.Internal
 
 
 type WignerFunction = Evolving Ket

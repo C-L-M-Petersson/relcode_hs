@@ -2,6 +2,7 @@
 module Maths.HilbertSpace.Scalar
 (   Scalar
 
+,   fromRealImag
 ,   fromReal
 ,   fromImag
 ,   i
@@ -57,12 +58,12 @@ instance Fractional Scalar where
 
 instance HasUnit Scalar where
     unitType = scalarUnit_
-    toUnits   (Scalar (Just ut) v) = let (r:+i) = v
-                                      in (\f -> Scalar (Just ut) (f r:+f i))
+    toUnits   (Scalar (Just ut) v) = let (r:+i_) = v
+                                      in (\f -> Scalar (Just ut) (f r:+f i_))
                                                             . to  <$>getUnit ut
     toUnits    s                   = return s
-    fromUnits (Scalar (Just ut) v) = let (r:+i) = v
-                                      in (\f -> Scalar (Just ut) (f r:+f i))
+    fromUnits (Scalar (Just ut) v) = let (r:+i_) = v
+                                      in (\f -> Scalar (Just ut) (f r:+f i_))
                                                             . from<$>getUnit ut
     fromUnits  s                   = return s
     setUnit ut (Scalar _ v) = Scalar (Just ut) v
@@ -85,7 +86,7 @@ instance Read Scalar where
             readHead = Scalar Nothing . uncurry (:+) . read
                      $ takeUntil (==')') str'
             strTail  = dropUntil (==')') str'
-            str' = let replace from to = intercalate to . splitOn from
+            str' = let replace x y = intercalate x . splitOn y
                     in replace "NaN" "0" str
 
 instance Show Scalar where

@@ -10,11 +10,6 @@ module QState.PertWave
 
 import           Control.Monad.Extra
 
-import           Data.Complex
-
-import           Maths.HilbertSpace
-import           Maths.QuantumNumbers
-
 import           QState
 import           QState.Configure
 import           QState.PertWave.Internal

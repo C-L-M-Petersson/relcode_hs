@@ -1,7 +1,7 @@
 module QState.Units
 (   EnergyUnit
 ,   TimeUnit
-,   UnitType
+,   UnitType(..)
 ,   to
 ,   from
 
@@ -10,8 +10,6 @@ module QState.Units
 ,   toUnits
 ,   fromUnits
 ,   setUnit
-
-,   UnitType(..)
 ) where
 
 import           QState

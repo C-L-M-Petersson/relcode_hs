@@ -32,6 +32,7 @@ instance HasUnit a => HasUnit (Evolving a) where
                 _                 -> return mXs
             vAt' = case mUT of Just _  -> mapM fromUnits vAt
                                Nothing -> return vAt
+    setUnit ut (Evolving _ mXs vAt) = Evolving (Just ut) mXs vAt
 
 instance Num a => Num (Evolving a) where
       negate      = emap negate

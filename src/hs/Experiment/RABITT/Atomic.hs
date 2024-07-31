@@ -6,9 +6,6 @@ module Experiment.RABITT.Atomic
 ,   calcAtomicPhaseForQNums
 ) where
 
-import           Control.Lens ((??))
-import           Control.Monad.Extra
-
 import           Data.Composition
 import           Data.Maybe
 
@@ -20,7 +17,6 @@ import           Maths.QuantumNumbers
 
 import           QState
 import           QState.Configure
-import           QState.Energy
 import           QState.OnePhoton
 import           QState.PertWave
 import           QState.TwoPhoton
@@ -36,9 +32,9 @@ calcAndSaveAtomicPhaseForQNums kappa0 n0 kappas2 = do
     irStepFraction <- getReadOption "IRStepFractionRABITT"
     es             <- getEs kappa0 n0>>=mapM toUnits
                         . map (setUnit Energy . fromReal) . drop irStepFraction
-    phase          <- calcAtomicPhaseForQNums kappa0 n0 kappas2
+    atomicPhase    <- calcAtomicPhaseForQNums kappa0 n0 kappas2
 
-    savePhase "Atomic" es phase
+    savePhase "Atomic" es atomicPhase
 
 
 calcAtomicPhases :: QState [[Double]]
@@ -63,11 +59,6 @@ matElemPairedMj kappa0 n0 kappas1 kappa2 mJ = do
     kE <- getReadOption "eFinalIndexEmiRABITT"
             >>=matElemSingleChannel kappa0 n0 kappas1 kappa2 mJ>>=ketEmi
     return $ kzip (*) ((<|)kA) kE
-
-matElemSingleMj :: QNum -> QNum -> [QNum] -> [QNum] -> QNum -> Int -> QState Ket
-matElemSingleMj kappa0 n0 kappas1 kappas2 mJ eFinalIndex = sum<$>sequence
-    [ matElemSingleChannel kappa0 n0 kappas1 kappa2 mJ eFinalIndex
-                                                        | kappa2 <- kappas2 ]
 
 matElemSingleChannel :: QNum -> QNum -> [QNum] -> QNum -> QNum -> Int
                                                                 -> QState Ket

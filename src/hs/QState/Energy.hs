@@ -21,7 +21,6 @@ module QState.Energy
 
 import           Maths.HilbertSpace
 import           Maths.Interpolate
-import           Maths.QuantumNumbers
 
 import           QState
 import           QState.Configure

@@ -15,9 +15,6 @@ import           Maths.QuantumNumbers
 import           QState
 import           QState.Configure
 
-import Maths.HilbertSpace.Scalar
-import QState.Output
-import           QState.TwoPhoton
 
 rabitt :: QState()
 rabitt = (whenRunRABITT $ forGroundStates_ rabittForQNums)

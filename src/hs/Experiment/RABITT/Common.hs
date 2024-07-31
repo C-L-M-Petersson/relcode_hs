@@ -31,7 +31,6 @@ import           QState.Output
 import           QState.TwoPhoton
 import           QState.Units
 
-import QState.Units.Delay
 
 whenRunRABITT :: QState() -> QState()
 whenRunRABITT = whenM (getReadOption "runRABITT")

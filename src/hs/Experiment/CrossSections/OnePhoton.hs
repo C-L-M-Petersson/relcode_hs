@@ -9,21 +9,16 @@ module Experiment.CrossSections.OnePhoton
 
 import           Control.Monad.Extra
 
-import           Data.List.Extra
-
 import           Maths.HilbertSpace.Ket
 import           Maths.HilbertSpace.Scalar
 import           Maths.QuantumNumbers
 
 import           QState
 import           QState.Configure
-import           QState.Energy
 import           QState.OnePhoton
 import           QState.Output
 import           QState.Units
-import           QState.Units.CrossSec
 import           QState.Utility.Constants
-
 
 
 crossSection1ph :: QState()

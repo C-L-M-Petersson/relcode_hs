@@ -1,6 +1,10 @@
 -- {-# #-}jkjjkjg
 module QState.TwoPhoton.Internal
-(   energyRPA
+(   fileLines
+,   readFileColIndex
+,   filterBreakPoints
+
+,   energyRPA
 ,   energyFin
 
 ,   irOmegas
@@ -25,7 +29,11 @@ fileLines file cDict = lines<$>readFile fp
     where fp = secondPhotonDir cDict++"/"++file++".dat"
 
 fileCol :: FilePath -> Int -> CDict -> IO [String]
-fileCol file col cDict = map ((!!col) . words)<$>fileLines file cDict
+fileCol file col cDict = let filterNAN ('N':'a':'N':cs) = '0':filterNAN cs
+                             filterNAN           (c:cs) =  c :filterNAN cs
+                             filterNAN              []  = []
+                          in map (filterNAN . (!!col) . words)
+                                                        <$>fileLines file cDict
 
 readFileLines :: Read a => FilePath -> CDict -> IO [a]
 readFileLines file cDict = map read<$>fileLines file cDict
@@ -52,6 +60,21 @@ readFileColKappa file kappa0 kappa1 kappa2 cDict
             | otherwise                      = Nothing
 
 
+filterBreakPoints :: [a] -> CDict -> [a]
+filterBreakPoints    []   _     = error "file empty"
+filterBreakPoints (_:xs) cDict
+    | bPI<0||bPI>=5 = error $ "breakPointIndex = "++show bPI
+    | otherwise     = let everyFifth x_s | null x_s  = []
+                                         | otherwise = head x_s
+                                                     : everyFifth (drop 5 x_s)
+                       in everyFifth $ drop bPI xs
+    where bPI = cDictReadOption "breakPointIndex" cDict
+
+
+phaseRPA :: QNum -> QNum -> CDict -> IO [Double]
+phaseRPA kappa0 n0 = readFileLines
+    $ "energy_rpa_"++show kappa0++"_"++show (nthKappaElevel kappa0 n0)
+
 energyRPA :: QNum -> QNum -> CDict -> IO [Double]
 energyRPA kappa0 n0 = readFileLines
     $ "energy_rpa_"++show kappa0++"_"++show (nthKappaElevel kappa0 n0)
@@ -71,27 +94,24 @@ irOmegas eFinalIndex cDict = zipWith (-)<$>energyFin kappa0 n0 eFinalIndex cDict
 
 
 mElementPrimitive :: QNum -> QNum -> QNum -> QNum -> Int -> CDict -> IO [Scalar]
-mElementPrimitive kappa0 n0 kappa1 kappa2 eFinalIndex = (filterLines<$>)
-                        . readFileColKappa mElemFilePath kappa0 kappa1 kappa2
+mElementPrimitive kappa0 n0 kappa1 kappa2 eFinalIndex cDict =
+        (`filterBreakPoints`cDict)
+                    <$>readFileColKappa mElemFilePath kappa0 kappa1 kappa2 cDict
     where
-        filterLines :: [a] -> [a]
-        filterLines    []  = error "file empty"
-        filterLines (x:xs) = let everyFifth x_s = case drop 4 x_s of
-                                                x_:x_s' -> x_ : everyFifth x_s'
-                                                []      -> []
-                              in everyFifth (x:x:xs)
-
         mElemFilePath = "m_elements_eF"++show eFinalIndex++"_"++show kappa0
                                   ++"_"++show (nthKappaElevel kappa0 n0)
 
 mElement :: QNum -> QNum -> QNum -> QNum -> QNum -> Int -> CDict -> IO [Scalar]
 mElement kappa0 n0 kappa1 kappa2 mJ eFinalIndex cDict = zipWith ((*fact).:(*))
         <$>mElementPrimitive kappa0 n0 kappa1 kappa2 eFinalIndex cDict
-        <*>(map (subtractedPhaseFactor kappa1 (cDictReadOption "zEff" cDict))
+        <*>(map (subtractedPhaseFactor kappa2 (cDictReadOption "zEff" cDict))
                                     <$>energyFin kappa0 n0 eFinalIndex cDict)
-    where
+    where --TODO: Add phase
         j0 = jFromKappa kappa0
         j1 = jFromKappa kappa1
         j2 = jFromKappa kappa2
-        fact = wigner3j j2 1 j1 (-mJ) 0 mJ * wigner3j j1 1 j0 (-mJ) 0 mJ
+        fact = wigner3j   j2  1 j1
+                        (-mJ) 0 mJ
+             * wigner3j   j1  1 j0
+                        (-mJ) 0 mJ
              * (-1)**scalarFromQNum(j2+j1-2*mJ)

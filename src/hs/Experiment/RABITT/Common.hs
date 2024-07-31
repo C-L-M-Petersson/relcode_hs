@@ -42,7 +42,8 @@ forGroundStates f = do
     kappas0 <- getReadOption "kappas0"
     ns0     <- getReadOption "ns0"
 
-    sequence  [ f kappa0 n0 | (kappa0,n0) <- kappas0`zip`ns0 ]
+    sequence  [ withOptions ["kappas0","ns0"] [show [kappa0],show [n0]]
+              $ f kappa0 n0 | (kappa0,n0) <- kappas0`zip`ns0 ]
 
 forGroundStates_ :: (QNum -> QNum -> QState a) -> QState()
 forGroundStates_ = void . forGroundStates
@@ -51,8 +52,12 @@ forGroundStates_ = void . forGroundStates
 getSideBandEnergy :: QNum -> QNum -> QState [Scalar]
 getSideBandEnergy kappa0 n0 = do
     irStepFraction <- getReadOption "IRStepFractionRABITT"
-    getEs kappa0 n0>>=
-        mapM (toUnits . setUnit Energy . fromReal) . drop irStepFraction
+
+    es             <- getEs kappa0 n0
+    let esAbs =           drop (2*irStepFraction)             es
+        esEmi = reverse . drop (2*irStepFraction) . reverse $ es
+
+    mapM (toUnits . setUnit Energy . fromReal) $ zipWith ((/2).:(+)) esAbs esEmi
 
 
 savePhase :: (Show a,Show b) => String -> [a] -> [b] -> QState()

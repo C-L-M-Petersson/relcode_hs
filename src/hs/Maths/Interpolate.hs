@@ -30,7 +30,6 @@ interpolateKet xs k
                             in ket (ketBasisUnit k) (Just xs) newElems
 
 
-
 changeGridSize :: (Enum a,Ord a,Fractional a,Fractional b) => (a -> b) -> Int
                                                             -> [a] -> [b] -> [b]
 changeGridSize f x_N xs ys = interpolateList f x_s xs ys

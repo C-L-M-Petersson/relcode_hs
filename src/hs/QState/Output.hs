@@ -33,8 +33,11 @@ putStrLnQState = liftIO . putStrLn
 
 
 putStrQStateFile :: FilePath -> String -> QState()
-putStrQStateFile fp x = createParentDir fp
-                      >>join (liftIO.:writeFile<$>getCDictFilePath fp??x)
+--putStrQStateFile fp x = createParentDir fp
+--                      >>join (liftIO.:writeFile<$>getCDictFilePath fp??x)
+putStrQStateFile fp x = do
+    getCDictFilePath fp>>=liftIO.putStrLn
+    createParentDir fp>>join (liftIO.:writeFile<$>getCDictFilePath fp??x)
 
 printQStateFile :: Show a => FilePath -> a -> QState()
 printQStateFile fp = putStrQStateFile fp . show

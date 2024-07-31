@@ -31,7 +31,8 @@ calcAndSaveWignerPhase = forGroundStates_
             $ (getReadOption "kappas1">>=).:calcAndSaveWignerPhaseForQNums
 
 calcAndSaveWignerPhaseForQNums :: QNum -> QNum -> [QNum] -> QState()
-calcAndSaveWignerPhaseForQNums kappa0 n0 kappas1 = do
+calcAndSaveWignerPhaseForQNums kappa0 n0 kappas1 = withOptions
+    ["kappas0","ns0","kappas1"] [show [kappa0],show [n0],show kappas1] $ do
     irStepFraction <- getReadOption "IRStepFractionRABITT"
     es             <- getEs kappa0 n0>>=mapM toUnits
                         . map (setUnit Energy . fromReal) . drop irStepFraction
@@ -46,16 +47,14 @@ calcWignerPhases = forGroundStates
 
 calcWignerPhaseForQNums :: QNum -> QNum -> [QNum] -> QState [Double]
 calcWignerPhaseForQNums kappa0 n0 kappas1 = toPhaseOrDelay
-    . ketElems . sum=<<mapM (matElemPairedMj kappa0 n0 kappas1)
-                            (mValues . maximum $ map jFromKappa kappas1)
+    . ketElems . sum=<<sequence [ matElemPairedChannel kappa0 n0 kappa1 mJ
+        | kappa1 <- kappas1
+        , mJ     <- mValues . maximum $ map jFromKappa kappas1
+        ]
 
-matElemPairedMj :: QNum -> QNum -> [QNum] -> QNum -> QState Ket
-matElemPairedMj kappa0 n0 kappas1 mj = uncurry (kzip (*)) . mapFst (<|)
-        <$>(matElemSingleMj kappa0 n0 kappas1 mj>>=ketAbsEmi)
-
-matElemSingleMj :: QNum -> QNum -> [QNum] -> QNum -> QState Ket
-matElemSingleMj kappa0 n0 kappas1 mj = sum<$>sequence
-    [ matElemSingleChannel kappa0 n0 kappa1 mj | kappa1 <- kappas1 ]
+matElemPairedChannel :: QNum -> QNum -> QNum -> QNum -> QState Ket
+matElemPairedChannel kappa0 n0 kappa1 mJ = uncurry (kzip (*)) . mapFst (<|)
+        <$>(matElemSingleChannel kappa0 n0 kappa1 mJ>>=ketAbsEmi)
 
 matElemSingleChannel :: QNum -> QNum -> QNum -> QNum -> QState Ket
 matElemSingleChannel kappa0 n0 kappa1 mj = do

@@ -43,32 +43,37 @@ calcAndSaveAtomicPhaseForQNums kappa0 n0 kappas2 = do
 
 calcAtomicPhases :: QState [[Double]]
 calcAtomicPhases = forGroundStates
-                 $ (getReadOption "kappas1">>=).:calcAtomicPhaseForQNums
+                 $ (getReadOption "kappas2">>=).:calcAtomicPhaseForQNums
 
 calcAtomicPhaseForQNums :: QNum -> QNum -> [QNum] -> QState [Double]
-calcAtomicPhaseForQNums kappa0 n0 kappas2 = toPhaseOrDelay
-    . ketElems . sum=<<join (sequence<$>mapM
-            ((matElemPairedMj kappa0 n0<$>getReadOption "kappas1"??kappas2)??)
-                (mValues . maximum $ map jFromKappa kappas2))
+calcAtomicPhaseForQNums kappa0 n0 kappas2 = do
+    kappas1 <- getReadOption "kappas1"
 
-matElemPairedMj :: QNum -> QNum -> [QNum] -> [QNum] -> QNum -> QState Ket
-matElemPairedMj kappa0 n0 kappas1 kappas2 mj = do
+    toPhaseOrDelay=<<ketElems . sum<$>sequence
+        [ matElemPairedMj kappa0 n0 kappas1 kappa2 mJ
+            | kappa2 <- kappas2
+            , mJ     <- mValuesKappas (kappa0:kappas1++kappas2)
+            ]
+
+
+matElemPairedMj :: QNum -> QNum -> [QNum] -> QNum -> QNum -> QState Ket
+matElemPairedMj kappa0 n0 kappas1 kappa2 mJ = do
     kA <- getReadOption "eFinalIndexAbsRABITT"
-            >>=matElemSingleMj kappa0 n0 kappas1 kappas2 mj>>=ketAbs
+            >>=matElemSingleChannel kappa0 n0 kappas1 kappa2 mJ>>=ketAbs
     kE <- getReadOption "eFinalIndexEmiRABITT"
-            >>=matElemSingleMj kappa0 n0 kappas1 kappas2 mj>>=ketEmi
+            >>=matElemSingleChannel kappa0 n0 kappas1 kappa2 mJ>>=ketEmi
     return $ kzip (*) ((<|)kA) kE
 
 matElemSingleMj :: QNum -> QNum -> [QNum] -> [QNum] -> QNum -> Int -> QState Ket
-matElemSingleMj kappa0 n0 kappas1 kappas2 mj eFinalIndex = sum<$>sequence
-    [ matElemSingleChannel kappa0 n0 kappas1 kappa2 mj eFinalIndex
+matElemSingleMj kappa0 n0 kappas1 kappas2 mJ eFinalIndex = sum<$>sequence
+    [ matElemSingleChannel kappa0 n0 kappas1 kappa2 mJ eFinalIndex
                                                         | kappa2 <- kappas2 ]
 
 matElemSingleChannel :: QNum -> QNum -> [QNum] -> QNum -> QNum -> Int
                                                                 -> QState Ket
-matElemSingleChannel kappa0 n0 kappas1 kappa2 mj eFinalIndex = do
-        mEs  <- getMElements [kappa0] [n0] kappas1 [kappa2] [mj] eFinalIndex
+matElemSingleChannel kappa0 n0 kappas1 kappa2 mJ eFinalIndex = do
+        mEs  <- getMElements [kappa0] [n0] kappas1 [kappa2] [mJ] eFinalIndex
         xi'' <- xi'<$>getReadOption "angleRABITT"
         getExcitedState kappa0 n0 $ map (*xi'') mEs
-    where xi' mTheta | isJust mTheta = xi kappa2 mj (fromJust mTheta) 0
+    where xi' mTheta | isJust mTheta = xi kappa2 mJ (fromJust mTheta) 0
                      | otherwise     = 1

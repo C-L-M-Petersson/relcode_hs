@@ -14,12 +14,14 @@ dependencies:
 - filepath       >= 1.4.2  && < 1.5
 - gamma          >= 0.10.0 && < 0.11
 - ghc            >= 9.4.6  && < 9.5
+- monad-loops    >= 0.4.3  && < 0.5
 - ieee           >= 0.7    && < 1.0
 - igrf           >= 0.4.0  && < 1.0
 - lens           >= 5.2.3  && < 5.3
 - mtl            >= 2.2.2  && < 2.3
 - safe           >= 0.3.19 && < 0.4
 - split          >= 0.2.3  && < 0.3
+- strict         >= 0.4    && < 1.0
 - utility-ht     >= 0.0.17 && < 0.1
 - wigner-symbols >= 1.0.0  && < 1.1
 - yjtools        >= 0.9.18 && < 1.0

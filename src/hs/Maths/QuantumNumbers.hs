@@ -13,6 +13,7 @@ module Maths.QuantumNumbers
 ,   reachableKappas
 
 ,   mValues
+,   mValuesKappas
 ) where
 
 import           Maths.QuantumNumbers.Error
@@ -43,3 +44,6 @@ mValues qN = let mValuesRec m
                     | m==qN     = [m]
                     | otherwise =  m : mValuesRec (m+1)
               in mValuesRec (-qN)
+
+mValuesKappas :: [QNum] -> [QNum]
+mValuesKappas = mValues . minimum . map jFromKappa

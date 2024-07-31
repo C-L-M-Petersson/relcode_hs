@@ -19,4 +19,4 @@ instance Read (Double -> DelayUnit) where
 
 instance Unit DelayUnit where
     toUnitFactor  Rad       = 1
-    toUnitFactor (AS omega) = 1/2/omega*auToAs
+    toUnitFactor (AS omega) = 1/2/abs omega*auToAs

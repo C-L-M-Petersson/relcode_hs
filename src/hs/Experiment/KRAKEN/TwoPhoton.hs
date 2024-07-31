@@ -35,7 +35,7 @@ kraken2ph :: QState()
 kraken2ph = whenRunKraken2ph . join $ kraken2phForQNums
     <$>getReadOption "kappas0"<*>getReadOption "ns0"
     <*>getReadOption "kappas1"<*>getReadOption "kappas2"
-    <*>getReadOption "eFinalIndex"
+    <*>getReadOption "eFinalIndexKRAKEN"
 
 kraken2phForQNums :: [QNum] -> [QNum] -> [QNum] -> [QNum] -> Int -> QState()
 kraken2phForQNums kappas0 ns0 kappas1 kappas2 eFinalIndex = whenRunKraken2ph $
@@ -85,9 +85,9 @@ getPureStatesByOnePhotonEnergy kappas0 ns0 kappas1 kappas2 eFinalIndex = do
 
 getPureStateByOnePhotonEnergy :: QNum -> QNum -> [QNum] -> [QNum] -> [QNum]
                                                             -> Int -> QState Ket
-getPureStateByOnePhotonEnergy kappa0 n0 kappas1 kappas2 msJ eFinalIndex =
+getPureStateByOnePhotonEnergy kappa0 n0 kappas1 kappas2 mJs eFinalIndex =
     join (interpolatedExcitedState<$>getOmegas kappa0 n0
                                   <*>getMElements [kappa0] [n0]
                                                    kappas1 kappas2
-                                                   msJ eFinalIndex)
+                                                   mJs eFinalIndex)
         >>=((shiftBasis<$>getHFEnergy kappa0 n0)??)>>=energyKetToEGrid

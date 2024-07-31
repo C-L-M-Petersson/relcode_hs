@@ -32,11 +32,11 @@ crossSection1ph = whenRunCrossSections1ph . join $ crossSection1phForQNums
 
 crossSection1phForQNums :: [QNum] -> [QNum] -> [QNum] -> QState()
 crossSection1phForQNums kappas0 ns0 kappas1 = sequence_
-        [ crossSectionPCurs kappa0 n0 kappas1>>=
+        [ crossSectionPCurs kappas0 ns0 kappas1>>=
                 ifSaveData printQStateFileWithUnits "CrossSectionPCur"
-        >>crossSectionAmps  kappa0 n0 kappas1>>=
+        >>crossSectionAmps  kappas0 ns0 kappas1>>=
                 ifSaveData printQStateFileWithUnits "CrossSectionAmp"
-            | (kappa0,n0) <- zip kappas0 ns0 ]
+        ]
     where ifSaveData save key val = whenM (getReadOption ("save"++key++"1ph"))
                                   $ save ("outFile"++key++"1ph") val
 
@@ -44,9 +44,10 @@ whenRunCrossSections1ph :: QState() -> QState()
 whenRunCrossSections1ph = whenM (getReadOption "runCrossSection1ph")
 
 
-crossSectionPCurs :: QNum -> QNum -> [QNum] -> QState Ket
-crossSectionPCurs kappa0 n0 kappas1 = sum
-                                   <$>mapM (crossSectionPCur kappa0 n0) kappas1
+crossSectionPCurs :: [QNum] -> [QNum] -> [QNum] -> QState Ket
+crossSectionPCurs kappas0 ns0 kappas1 = sum<$>sequence
+    [ crossSectionPCur kappa0 n0 kappa1
+            | (kappa0,n0) <- zip kappas0 ns0, kappa1 <- kappas1 ]
 
 crossSectionPCur :: QNum -> QNum -> QNum -> QState Ket
 crossSectionPCur kappa0 n0 kappa1 = getPCur kappa0 n0 kappa1
@@ -55,9 +56,10 @@ crossSectionPCur kappa0 n0 kappa1 = getPCur kappa0 n0 kappa1
             >>=divE kappa0 n0
 
 
-crossSectionAmps :: QNum -> QNum -> [QNum] -> QState Ket
-crossSectionAmps kappa0 n0 kappas1 = sum
-                                  <$>mapM (crossSectionAmp kappa0 n0) kappas1
+crossSectionAmps :: [QNum] -> [QNum] -> [QNum] -> QState Ket
+crossSectionAmps kappas0 ns0 kappas1 = sum<$>sequence
+    [ crossSectionAmp kappa0 n0 kappa1
+            | (kappa0,n0) <- zip kappas0 ns0, kappa1 <- kappas1 ]
 
 crossSectionAmp :: QNum -> QNum -> QNum -> QState Ket
 crossSectionAmp kappa0 n0 kappa1 = zipWith calc<$>getAmp kappa0 n0 kappa1

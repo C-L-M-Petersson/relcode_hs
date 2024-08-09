@@ -9,6 +9,8 @@ module QState.TwoPhoton.Internal
 
 ,   irOmegas
 
+,   phaseFactorPrimitive
+,   mElementPrimitive
 ,   mElement
 ) where
 
@@ -105,9 +107,8 @@ mElementPrimitive :: QNum -> QNum -> QNum -> QNum -> Int -> CDict -> IO [Scalar]
 mElementPrimitive kappa0 n0 kappa1 kappa2 eFinalIndex cDict =
         (`filterBreakPoints`cDict)
                     <$>readFileColKappa mElemFilePath kappa0 kappa1 kappa2 cDict
-    where
-        mElemFilePath = "m_elements_eF"++show eFinalIndex++"_"++show kappa0
-                                  ++"_"++show (nthKappaElevel kappa0 n0)
+    where mElemFilePath = "m_elements_eF"++show eFinalIndex++"_"++show kappa0
+                                    ++"_"++show (nthKappaElevel kappa0 n0)
 
 mElement :: QNum -> QNum -> QNum -> QNum -> QNum -> Int -> CDict -> IO [Scalar]
 mElement kappa0 n0 kappa1 kappa2 mJ eFinalIndex cDict = map ((fact*) . product)

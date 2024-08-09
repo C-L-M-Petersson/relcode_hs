@@ -3,6 +3,7 @@ module QState.PertWave.Internal
 ,   subtractedPhase
 
 ,   xi
+,   sphericalHarmonic
 ) where
 
 import           Data.Composition
@@ -49,7 +50,7 @@ sphericalHarmonic l m theta phi = exp( i(m''*phi) )
         associatedLegendreWrapper :: Int -> Double
         associatedLegendreWrapper ml
             | ml<0      = fact*associatedLegendreWrapper (-ml)
-            | otherwise = associatedLegendreFunction l' ml theta
+            | otherwise = associatedLegendreFunction l' ml $ cos theta
             where
                 ml' = fromIntegral ml
                 fact = (-1)**ml'*product [1..l''-ml']/product [1..l''+ml']

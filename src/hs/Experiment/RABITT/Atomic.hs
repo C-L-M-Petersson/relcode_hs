@@ -63,7 +63,8 @@ matElemPairedMj kappa0 n0 kappas1 kappa2 mJ = do
 matElemSingleChannel :: QNum -> QNum -> [QNum] -> QNum -> QNum -> Int
                                                                 -> QState Ket
 matElemSingleChannel kappa0 n0 kappas1 kappa2 mJ eFinalIndex = do
-        mEs  <- getMElements [kappa0] [n0] kappas1 [kappa2] [mJ] eFinalIndex
+        mEs  <- getMElements          [kappa0] [n0] kappas1 [kappa2] [mJ] eFinalIndex
+        --mEs  <- getMElementsCorrected [kappa0] [n0] kappas1 [kappa2] [mJ] eFinalIndex
         xi'' <- xi'<$>getReadOption "angleRABITT"
         getExcitedState kappa0 n0 $ map (*xi'') mEs
     where xi' mTheta | isJust mTheta = xi kappa2 mJ (fromJust mTheta) 0

@@ -81,12 +81,12 @@ instance Ord Scalar where
     s <=      s' = toReal s <=      toReal s'
 
 instance Read Scalar where
-    readsPrec _ str         = [(readHead,strTail)]
+    readsPrec _ str = [(readHead,strTail)]
         where
             readHead = Scalar Nothing . uncurry (:+) . read
                      $ takeUntil (==')') str'
             strTail  = dropUntil (==')') str'
-            str' = let replace x y = intercalate x . splitOn y
+            str' = let replace x y = intercalate y . splitOn x
                     in replace "NaN" "0" str
 
 instance Show Scalar where

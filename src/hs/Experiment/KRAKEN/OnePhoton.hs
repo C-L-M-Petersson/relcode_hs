@@ -56,7 +56,7 @@ getPureStateSum = (sum<$>) .:. getPureStates
 
 getPureStates :: [QNum] -> [QNum] -> [QNum] -> QState [Ket]
 getPureStates kappas0 ns0 kappas1 = do
-    groupedKappas1 <- groupOnePhotonKappasByCoherence kappas1
+    groupedKappas1 <- groupOnePhotonKappasByCoherence True kappas1
 
     sequence
         [ getPureState kappa0 n0 kappas1'

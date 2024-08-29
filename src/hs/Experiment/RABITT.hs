@@ -1,6 +1,6 @@
 module Experiment.RABITT
 (   rabitt
-,   rabittForQNums
+,   rabittGroundState
 ) where
 
 import           Control.Monad.Extra
@@ -17,10 +17,10 @@ import           QState.Configure
 
 
 rabitt :: QState()
-rabitt = (whenRunRABITT $ forGroundStates_ rabittForQNums)
+rabitt = (whenRunRABITT $ forGroundStates_ rabittGroundState)
 
-rabittForQNums :: QNum -> QNum -> QState()
-rabittForQNums kappa0 n0 = do
+rabittGroundState :: QNum -> QNum -> QState()
+rabittGroundState kappa0 n0 = do
     es <- getSideBandEnergy kappa0 n0
 
     saveWigner <- getReadOption "saveWignerRABITT"
@@ -29,9 +29,8 @@ rabittForQNums kappa0 n0 = do
 
     phaseW  <- if saveWigner||saveCC then getReadOption "kappas1"
                                             >>=calcWignerPhaseForQNums kappa0 n0
-                                      else return []
-    phaseAt <- if saveAtomic||saveCC then getReadOption "kappas2"
-                                            >>=calcAtomicPhaseForQNums kappa0 n0
+                                     else return []
+    phaseAt <- if saveAtomic||saveCC then calcAtomicPhaseGroundState kappa0 n0
                                      else return []
     let phaseCC = calcCCPhaseFromPhases phaseW phaseAt
 

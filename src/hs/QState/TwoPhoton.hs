@@ -4,14 +4,7 @@ module QState.TwoPhoton
 
 ,   getIROmegas
 
-,   getMElement
-,   getMElements
-
-,   getMElementCorrection
-,   getMElementsCorrection
-
-,   getMElementCorrected
-,   getMElementsCorrected
+,   getMElements2ph
 ) where
 
 import           Data.Composition
@@ -21,6 +14,9 @@ import           Maths.HilbertSpace.Scalar
 import           Maths.QuantumNumbers
 
 import           QState
+import           QState.Coherence
+import           QState.Configure
+import           QState.PertWave
 import           QState.TwoPhoton.Internal
 import           QState.TwoPhoton.RPAE
 
@@ -35,49 +31,26 @@ getEnergyFin = withCDictM.:.energyFin
 getIROmegas :: Int -> QState [Double]
 getIROmegas = withCDictM . irOmegas
 
+getMElement2phCoherent :: QNum -> QNum -> [QNum] -> [QNum] -> QNum -> Int
+                                                    -> Bool -> QState [Scalar]
+getMElement2phCoherent kappa0 n0 kappas1 kappas2 mJ eFinalIndex use2phRPAE =
+    map sum . transpose<$>sequence [ timesXi kappa2 mJ=<<withCDictM (\cDict ->
+        if use2phRPAE then zipWith (+)<$>m0 kappa2 cDict
+                                      <*>dm kappa2 cDict
+                      else m0 kappa2 cDict)
+                | kappa2 <- kappas2 ]
+        where
+            m0 kappa2 cDict = mElement2phKappas1    kappa0 n0 kappas1 kappa2 mJ
+                                                            eFinalIndex cDict
+            dm kappa2 cDict = mElement2phCorrection kappa0 n0         kappa2 mJ
+                                                            eFinalIndex cDict
 
-getMElement :: QNum -> QNum -> QNum -> QNum -> QNum -> Int -> QState [Scalar]
-getMElement = withCDictM.:::mElement
+getMElements2ph :: QNum -> QNum -> [QNum] -> QNum -> Int -> QState [[Scalar]]
+getMElements2ph kappa0 n0 kappas2 mJ eFinalIndex = do
+    kappas1s   <- onePhotonKappasGroupedByCoherence False
+    kappas2s   <- groupTwoPhotonKappasByCoherence   True  kappas2
+    use2phRPAE <- getReadOption "use2phRPAE"
 
-getMElements :: [QNum] -> [QNum] -> [QNum] -> [QNum] ->  [QNum] -> Int
-                                                            -> QState [Scalar]
-getMElements kappas0 ns0 kappas1 kappas2 mJs eFinalIndex = map sum . transpose
-    <$>sequence [ getMElement kappa0 n0 kappa1 kappa2 mJ eFinalIndex
-                    | (kappa0,n0) <- zip kappas0 ns0, kappa1 <- kappas1
-                                                    , kappa2 <- kappas2
-                                                    , mJ     <- mJs ]
-
-getMElementCorrection :: QNum -> QNum -> QNum ->  QNum -> Int
-                                                            -> QState [Scalar]
-getMElementCorrection kappa0 n0 kappa2 mJ eFinalIndex = withCDictM
-                    $ mElementCorrectionKappa kappa0 n0 kappa2 mJ eFinalIndex
-
-getMElementsCorrection :: [QNum] -> [QNum] -> [QNum] ->  [QNum] -> Int
-                                                            -> QState [Scalar]
-getMElementsCorrection kappas0 ns0 kappas2 mJs eFinalIndex = map sum
-                                                                   . transpose
-    <$>sequence [ getMElementCorrection kappa0 n0 kappa2 mJ eFinalIndex
-        | (kappa0,n0) <- zip kappas0 ns0, kappa2 <- kappas2, mJ <- mJs ]
-
-
-getMElementCorrected :: QNum -> QNum -> QNum -> QNum -> QNum -> Int
-                                                            -> QState [Scalar]
-getMElementCorrected kappa0 n0 kappa1 kappa2 mJ eFinalIndex = zipWith (+)
-                <$>getMElement           kappa0 n0 kappa1 kappa2 mJ eFinalIndex
-                <*>getMElementCorrection kappa0 n0        kappa2 mJ eFinalIndex
-
-getMElementsCorrected :: [QNum] -> [QNum] -> [QNum] -> [QNum] ->  [QNum] -> Int
-                                                            -> QState [Scalar]
-getMElementsCorrected kappas0 ns0 kappas1 kappas2 mJs eFinalIndex = map sum . transpose
-    <$>sequence [ getMElementCorrected kappa0 n0 kappa1 kappa2 mJ eFinalIndex
-                    | (kappa0,n0) <- zip kappas0 ns0, kappa1 <- kappas1
-                                                    , kappa2 <- kappas2
-                                                    , mJ     <- mJs ]
---getMElementsCorrected kappas0 ns0 kappas1 kappas2 mJs eFinalIndex = do
---getMElementsCorrected kappas0 ns0 kappas1 kappas2 mJs eFinalIndex = do
---       mes <- getMElementsCorrection kappas0 ns0         kappas2 mJs eFinalIndex
---       error $ show mes
---getMElementsCorrected kappas0 ns0 kappas1 kappas2 mJs eFinalIndex = zipWith (+)
---getMElementsCorrected kappas0 ns0 kappas1 kappas2 mJs eFinalIndex = zipWith (\m mCorr -> mCorr)
---    <$>getMElements           kappas0 ns0 kappas1 kappas2 mJs eFinalIndex
---    <*>getMElementsCorrection kappas0 ns0         kappas2 mJs eFinalIndex
+    sequence [ getMElement2phCoherent kappa0 n0 kappas1 kappas2' mJ eFinalIndex
+                                                                    use2phRPAE
+                | kappas1 <- kappas1s, kappas2' <- kappas2s ]

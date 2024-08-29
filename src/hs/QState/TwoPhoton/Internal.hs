@@ -10,8 +10,9 @@ module QState.TwoPhoton.Internal
 ,   irOmegas
 
 ,   phaseFactorPrimitive
-,   mElementPrimitive
-,   mElement
+,   mElement2phKappa1Primitive
+,   mElement2phKappa1
+,   mElement2phKappas1
 ) where
 
 import           Data.List                       (transpose)
@@ -103,21 +104,23 @@ phaseFactorPrimitive kappa0 n0 kappa1 kappa2 eFinalIndex cDict = map (exp . i)
         phaseFilePath = "phase_eF"++show eFinalIndex++"_"++show kappa0
                              ++"_"++show (nthKappaElevel kappa0 n0)
 
-mElementPrimitive :: QNum -> QNum -> QNum -> QNum -> Int -> CDict -> IO [Scalar]
-mElementPrimitive kappa0 n0 kappa1 kappa2 eFinalIndex cDict =
+mElement2phKappa1Primitive :: QNum -> QNum -> QNum -> QNum -> Int -> CDict
+                                                                -> IO [Scalar]
+mElement2phKappa1Primitive kappa0 n0 kappa1 kappa2 eFinalIndex cDict =
         (`filterBreakPoints`cDict)
                     <$>readFileColKappa mElemFilePath kappa0 kappa1 kappa2 cDict
     where mElemFilePath = "m_elements_eF"++show eFinalIndex++"_"++show kappa0
                                     ++"_"++show (nthKappaElevel kappa0 n0)
 
-mElement :: QNum -> QNum -> QNum -> QNum -> QNum -> Int -> CDict -> IO [Scalar]
-mElement kappa0 n0 kappa1 kappa2 mJ eFinalIndex cDict = map ((fact*) . product)
-         . transpose<$>sequence
-            [ mElementPrimitive kappa0 n0 kappa1 kappa2 eFinalIndex cDict
-            , phaseFactorPrimitive kappa0 n0 kappa1 kappa2 eFinalIndex cDict
-            , map (subtractedPhaseFactor kappa2 (cDictReadOption "zEff" cDict))
-                                        <$>energyFin kappa0 n0 eFinalIndex cDict
-            ]
+mElement2phKappa1 :: QNum -> QNum -> QNum -> QNum -> QNum -> Int -> CDict ->
+                                                                    IO [Scalar]
+mElement2phKappa1 kappa0 n0 kappa1 kappa2 mJ eFinalIndex cDict =
+    map ((fact*) . product) . transpose<$>sequence
+        [ mElement2phKappa1Primitive kappa0 n0 kappa1 kappa2 eFinalIndex cDict
+        , phaseFactorPrimitive    kappa0 n0 kappa1 kappa2 eFinalIndex cDict
+        , map (subtractedPhaseFactor kappa2 (cDictReadOption "zEff" cDict))
+                                    <$>energyFin kappa0 n0 eFinalIndex cDict
+        ]
     where
         j0 = jFromKappa kappa0
         j1 = jFromKappa kappa1
@@ -127,3 +130,10 @@ mElement kappa0 n0 kappa1 kappa2 mJ eFinalIndex cDict = map ((fact*) . product)
              * wigner3j   j1  1  j0
                         (-mJ) 0  mJ
              * (-1)**scalarFromQNum(j2+j1-2*mJ)
+
+mElement2phKappas1 :: QNum -> QNum -> [QNum] -> QNum -> QNum -> Int -> CDict
+                                                                -> IO [Scalar]
+mElement2phKappas1 kappa0 n0 kappas1 kappa2 mJ eFinalIndex cDict =
+    map sum . transpose<$>sequence
+        [ mElement2phKappa1 kappa0 n0 kappa1 kappa2 mJ eFinalIndex cDict
+            | kappa1 <- kappas1 ]

@@ -1,6 +1,5 @@
 module QState.TwoPhoton.RPAE
-(   mElementCorrection
-,   mElementCorrectionKappa
+(   mElement2phCorrection
 ) where
 
 import           Data.Composition
@@ -17,12 +16,9 @@ import           QState.TwoPhoton.Internal
 
 readFileColChannel :: (Num a,Read a) => FilePath -> QNum -> QNum -> QNum
                                                             -> CDict -> IO [a]
---readFileColChannel :: FilePath -> QNum -> QNum -> QNum
---                                                            -> CDict -> IO [Scalar]
 readFileColChannel file kappa0 kappa2 jTot cDict
     | isNothing mCol = (`replicate`0) . length<$>fileLines file cDict
-    | otherwise      = do putStrLn (show kappa0++" "++show kappa2++" "++show jTot++" "++show mCol)
-                          (`filterBreakPoints`cDict)<$>readFileColIndex file (fromJust mCol) cDict
+    | otherwise      = (`filterBreakPoints`cDict)<$>readFileColIndex file (fromJust mCol) cDict
     where mCol = let mColJTot0
                         | kappa2==  kappa0                 = Just 0
                         | otherwise                        = Nothing
@@ -38,25 +34,22 @@ readFileColChannel file kappa0 kappa2 jTot cDict
                                   _ -> Nothing
 
 
-mElementCorrectionPrimitive :: QNum -> QNum -> QNum -> QNum -> Int -> CDict
-                                                                -> IO [Scalar]
-mElementCorrectionPrimitive kappa0 n0 kappa2 jTot eFinalIndex cDict =
-                    readFileColChannel mElemFilePath kappa0 kappa2 jTot cDict
-    where mElemFilePath = "m_elem_2phRPAcorrection_eF"++show eFinalIndex++"_"
-                        ++show kappa0++"_"++show (nthKappaElevel kappa0 n0)
-                        ++"_Jtot"++show jTot
+mElement2phCorrectionJTotPrimitive :: QNum -> QNum -> QNum -> QNum -> Int
+                                                        -> CDict -> IO [Scalar]
+mElement2phCorrectionJTotPrimitive kappa0 n0 kappa2 jTot eFinalIndex cDict =
+                    readFileColChannel mElemFile kappa0 kappa2 jTot cDict
+    where mElemFile = "m_elem_2phRPAcorrection_eF"++show eFinalIndex++"_"
+                    ++show kappa0++"_"++show (nthKappaElevel kappa0 n0)
+                    ++"_Jtot"++show jTot
 
-mElementCorrection :: QNum -> QNum -> QNum -> QNum -> QNum -> Int -> CDict
-                                                                -> IO [Scalar]
-mElementCorrection kappa0 n0 kappa2 mJ jTot eFinalIndex cDict = zipWith
+mElement2phCorrectionJTot :: QNum -> QNum -> QNum -> QNum -> QNum -> Int
+                                                        -> CDict -> IO [Scalar]
+mElement2phCorrectionJTot kappa0 n0 kappa2 mJ jTot eFinalIndex cDict = zipWith
                                                                 ((*fact).:(*))
-        <$>mElementCorrectionPrimitive kappa0 n0 kappa2 jTot eFinalIndex cDict
+        <$>mElement2phCorrectionJTotPrimitive kappa0 n0 kappa2 jTot eFinalIndex
+                                                                        cDict
         <*>(map (subtractedPhaseFactor kappa2 (cDictReadOption "zEff" cDict))
                                     <$>energyFin kappa0 n0 eFinalIndex cDict)
---mElementCorrection kappa0 n0 kappa2 mJ jTot eFinalIndex cDict = map (*0)
---        -- <$>mElementCorrectionPrimitive kappa0 n0 kappa2 jTot eFinalIndex cDict
---        <$>(map (subtractedPhaseFactor kappa2 (cDictReadOption "zEff" cDict))
---                                    <$>energyFin kappa0 n0 eFinalIndex cDict)
     where
         j0 = jFromKappa kappa0
         j2 = jFromKappa kappa2
@@ -67,10 +60,10 @@ mElementCorrection kappa0 n0 kappa2 mJ jTot eFinalIndex cDict = zipWith
                           0    0    0
              * (-1)**scalarFromQNum(2*j2+j0+jTot-mJ)
 
-mElementCorrectionKappa :: QNum -> QNum -> QNum -> QNum -> Int -> CDict
+mElement2phCorrection :: QNum -> QNum -> QNum -> QNum -> Int -> CDict
                                                                 -> IO [Scalar]
-mElementCorrectionKappa kappa0 n0 kappa2 mJ eFinalIndex cDict
+mElement2phCorrection kappa0 n0 kappa2 mJ eFinalIndex cDict
     | kappa0==kappa2 = zipWith (+)<$>elemJTot 0<*>elemJTot 2
     | otherwise      = elemJTot 2
-    where elemJTot jTot = mElementCorrection kappa0 n0 kappa2 mJ jTot
+    where elemJTot jTot = mElement2phCorrectionJTot kappa0 n0 kappa2 mJ jTot
                                                             eFinalIndex cDict

@@ -25,6 +25,7 @@ import           Maths.WignerSymbol
 import           QState.Configure.Internal
 import           QState.FilePath.Internal
 import           QState.PertWave
+import           QState.Utility.Parse
 
 
 fileLines :: FilePath -> CDict -> IO [String]
@@ -32,11 +33,8 @@ fileLines file cDict = lines<$>readFile fp
     where fp = secondPhotonDir cDict++"/"++file++".dat"
 
 fileCol :: FilePath -> Int -> CDict -> IO [String]
-fileCol file col cDict = let filterNAN ('N':'a':'N':cs) = '0':filterNAN cs
-                             filterNAN           (c:cs) =  c :filterNAN cs
-                             filterNAN              []  = []
-                          in map (filterNAN . (!!col) . words)
-                                                        <$>fileLines file cDict
+fileCol file col cDict = map (filterNAN . (!!col) . words)
+                                <$>fileLines file cDict
 
 readFileLines :: Read a => FilePath -> CDict -> IO [a]
 readFileLines file cDict = map read<$>fileLines file cDict

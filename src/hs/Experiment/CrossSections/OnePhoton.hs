@@ -60,7 +60,11 @@ crossSectionAmp :: QNum -> QNum -> QNum -> QState Ket
 crossSectionAmp kappa0 n0 kappa1 = zipWith calc<$>getAmp kappa0 n0 kappa1
                                                <*>getWaveNumbers kappa0 n0
                                 >>=getExcitedState kappa0 n0>>=divE kappa0 n0
-    where calc a k = setUnit CrossSec $ fromReal (2*pi/3*fsc*a**2*k)
+    where calc a k
+            | isNaN a||isInfinite a = 0
+            | isNaN k||isInfinite k = 0
+            | otherwise             = setUnit CrossSec
+                                    $ fromReal (2*pi/3*fsc*a**2*k)
 
 divE :: QNum -> QNum -> Ket -> QState Ket
 divE kappa0 n0 k = (`kmod`k) . zipWith (flip (/)) . map fromReal

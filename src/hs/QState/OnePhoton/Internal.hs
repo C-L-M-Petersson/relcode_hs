@@ -23,6 +23,7 @@ import           QState.Configure.Internal
 import           QState.FilePath.Internal
 import           QState.HartreeFock.Internal
 import           QState.PertWave.Internal
+import           QState.Utility.Parse
 
 import           System.Directory
 import           System.IO.Strict as Strict
@@ -45,25 +46,29 @@ fileCol file kappa0 n0 col cDict = map ((!!col) . words)
 readFileLines :: Read a => FilePath -> QNum -> QNum -> CDict -> IO [a]
 readFileLines file kappa0 n0 cDict = map read<$>fileLines file kappa0 n0 cDict
 
-readBreakPointFilesColIndex :: Read a => FilePath -> QNum -> QNum -> Int
+readBreakPointFilesColIndex :: Read a => FilePath -> QNum -> QNum -> Int -> Int
                                                             -> CDict -> IO [a]
-readBreakPointFilesColIndex file kappa0 n0 col cDict =
+readBreakPointFilesColIndex file kappa0 n0 col bPI cDict =
     return . map (read . (!!bPI))
                             =<<mapM       (flip5 fileCol    cDict col n0 kappa0)
                             =<<takeWhileM (flip4 fileExists cDict     n0 kappa0)
                                 (map ((file++) . show) ([1..] :: [Int]))
-    where bPI = cDictReadOption "breakPointIndex" cDict
 
 readBreakPointFilesColKappa :: (Num a,Read a) => FilePath -> QNum -> QNum
                                                     -> QNum -> CDict -> IO [a]
 readBreakPointFilesColKappa file kappa0 n0 kappa1 cDict
-    | col== -1  = (`replicate`0) . length<$>fileLines file kappa0 n0 cDict
-    | otherwise = readBreakPointFilesColIndex file kappa0 n0 col cDict
-    where col
-            | kappa1==  kappa0-signum kappa0 =  0
+    | bPI<   0  = error "breakPointIndex < 0"
+    | bPI>   4  = error "breakPointIndex > 5"
+    | col== -1  = (`replicate`0) . length<$>colAll 0
+    | bPI==  2  = map read<$>colAll col
+    | otherwise = readBreakPointFilesColIndex file kappa0 n0 col bPI cDict
+    where
+        bPI = cDictReadOption "breakPointIndex" cDict
+        col | kappa1==  kappa0-signum kappa0 =  0
             | kappa1== -kappa0               =  1
             | kappa1==  kappa0+signum kappa0 =  2
             | otherwise                      = -1
+        colAll col = fileCol (file++"all") kappa0 n0 (col+1) cDict
 
 
 omegas :: QNum -> QNum -> CDict -> IO [Double]

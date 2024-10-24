@@ -13,7 +13,7 @@ import           QState.Utility.Constants
 
 
 coulombPhase :: QNum -> Double -> Double -> Double
-coulombPhase kappa zEff eKin = phase(gamma(phaseGamma kappa zEff :+ (-zEff/k)))
+coulombPhase kappa zEff eKin = phase(gamma(phaseGamma kappa zEff :+ (zEff/k)))
     where k = waveNumber eKin
 
 waveNumber :: Double -> Double

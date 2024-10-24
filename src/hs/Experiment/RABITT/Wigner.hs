@@ -44,19 +44,17 @@ calcWignerPhases = forGroundStates
 
 calcWignerPhaseForQNums :: QNum -> QNum -> [QNum] -> QState [Double]
 calcWignerPhaseForQNums kappa0 n0 kappas1 = toPhaseOrDelay
-    . ketElems . sum=<<sequence [ matElemPairedChannel kappa0 n0 kappa1 mJ
-        | kappa1 <- kappas1
-        , mJ     <- mValues . maximum $ map jFromKappa kappas1
-        ]
+        . ketElems . sum=<<sequence [ matElemPairedChannel kappa0 n0 kappa1 mJ
+            | kappa1 <- kappas1, mJ <- mValuesKappas [[kappa0],kappas1]]
 
 matElemPairedChannel :: QNum -> QNum -> QNum -> QNum -> QState Ket
 matElemPairedChannel kappa0 n0 kappa1 mJ = uncurry (kzip (*)) . mapFst (<|)
         <$>(matElemSingleChannel kappa0 n0 kappa1 mJ>>=ketAbsEmi)
 
 matElemSingleChannel :: QNum -> QNum -> QNum -> QNum -> QState Ket
-matElemSingleChannel kappa0 n0 kappa1 mj = do
-        mEs  <- getMatElem kappa0 n0 kappa1
+matElemSingleChannel kappa0 n0 kappa1 mJ = do
+        mEs  <- getMatElem kappa0 n0 kappa1 mJ
         xi'' <- xi'<$>getReadOption "angleRABITT"
         getExcitedState kappa0 n0 $ map (*xi'') mEs
-    where xi' mTheta | isJust mTheta = xi kappa1 mj (fromJust mTheta) 0
+    where xi' mTheta | isJust mTheta = xi kappa1 mJ (fromJust mTheta) 0
                      | otherwise     = 1

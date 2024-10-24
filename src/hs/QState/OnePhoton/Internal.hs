@@ -94,8 +94,8 @@ phaseG :: QNum -> QNum -> QNum -> CDict -> IO [Double]
 phaseG = readBreakPointFilesColKappa "/phaseG_"
 
 
-matElem :: QNum -> QNum -> QNum -> CDict -> IO [Scalar]
-matElem kappa0 n0 kappa1 cDict = map ((*w3j) . product) . transpose
+matElem :: QNum -> QNum -> QNum -> QNum -> CDict -> IO [Scalar]
+matElem kappa0 n0 kappa1 mJ cDict = map ((*w3j) . product) . transpose
     <$>sequence [ map        fromReal <$>amps   kappa0 n0 kappa1 cDict
                 , map (exp . fromImag)<$>phaseF kappa0 n0 kappa1 cDict
                 , map (subtractedPhaseFactor kappa1 zEff)
@@ -103,7 +103,7 @@ matElem kappa0 n0 kappa1 cDict = map ((*w3j) . product) . transpose
                 ]
     where
         zEff = cDictReadOption "zEff" cDict :: Double
-        w3j  = wigner3j   j0   1  j1
-                        (-1/2) 0 (1/2)
+        w3j  = wigner3j   j0  1  j1
+                        (-mJ) 0  mJ
         j0   = jFromKappa kappa0
         j1   = jFromKappa kappa1

@@ -17,7 +17,6 @@ import           QState.TwoPhoton
 import           QState.Units
 
 
-
 calcAndSaveAtomicPhase :: QState()
 calcAndSaveAtomicPhase = forGroundStates_ calcAndSaveAtomicPhaseGroundState
 
@@ -37,7 +36,7 @@ calcAtomicPhaseGroundState kappa0 n0 = do
 
     toPhaseOrDelay=<<ketElems . sum . concat<$>sequence
         [ matElemPairedMj kappa0 n0 mJ
-            | mJ <- mValuesKappas (kappa0:kappas1++kappas2) ]
+            | mJ <- mValuesKappas [[kappa0],kappas1,kappas2] ]
 
 matElemPairedMj :: QNum -> QNum -> QNum -> QState [Ket]
 matElemPairedMj kappa0 n0 mJ = do

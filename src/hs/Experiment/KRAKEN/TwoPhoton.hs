@@ -75,4 +75,4 @@ getMatrixElementGroundState kappa0 n0 = do
     eFinalIndex <- getReadOption "eFinalIndexKRAKEN"
 
     concat<$>sequence [ getMElements2ph kappa0 n0 kappas2 mJ eFinalIndex
-                        | mJ <- mValuesKappas (kappa0:kappas1++kappas2) ]
+                        | mJ <- mValuesKappas [[kappa0],kappas1,kappas2] ]

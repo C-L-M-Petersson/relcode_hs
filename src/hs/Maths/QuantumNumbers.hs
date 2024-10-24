@@ -45,5 +45,5 @@ mValues qN = let mValuesRec m
                     | otherwise =  m : mValuesRec (m+1)
               in mValuesRec (-qN)
 
-mValuesKappas :: [QNum] -> [QNum]
-mValuesKappas = mValues . minimum . map jFromKappa
+mValuesKappas :: [[QNum]] -> [QNum]
+mValuesKappas = mValues . minimum . map (maximum . map jFromKappa)

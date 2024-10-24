@@ -56,14 +56,20 @@ getPureStateSum = (sum<$>) .:. getPureStates
 
 getPureStates :: [QNum] -> [QNum] -> [QNum] -> QState [Ket]
 getPureStates kappas0 ns0 kappas1 = do
+    concat<$>sequence
+        [ getPureStatesGroundState kappa0 n0 kappas1
+            | (kappa0,n0) <- zip kappas0 ns0 ]
+
+getPureStatesGroundState :: QNum -> QNum -> [QNum] -> QState [Ket]
+getPureStatesGroundState kappa0 n0 kappas1 = do
     groupedKappas1 <- groupOnePhotonKappasByCoherence True kappas1
 
     sequence
-        [ getPureState kappa0 n0 kappas1'
-            | (kappa0,n0) <- zip kappas0 ns0
-            ,  kappas1'   <- groupedKappas1
+        [ getPureState kappa0 n0 kappas1' mJ
+            | kappas1' <- groupedKappas1
+            , mJ       <- mValuesKappas [[kappa0],kappas1]
             ]
 
-getPureState :: QNum -> QNum -> [QNum] -> QState Ket
-getPureState kappa0 n0 kappas1 = energyKetToEGrid
-    =<<getInterpolatedExcitedStateByEkin kappa0 n0 kappas1
+getPureState :: QNum -> QNum -> [QNum] -> QNum -> QState Ket
+getPureState kappa0 n0 kappas1 mJ = energyKetToEGrid
+    =<<getInterpolatedExcitedStateByEkin kappa0 n0 kappas1 mJ

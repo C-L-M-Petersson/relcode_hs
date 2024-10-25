@@ -7,7 +7,6 @@ module Experiment.RABITT.Wigner
 ) where
 
 import           Data.Composition
-import           Data.Maybe
 import           Data.Tuple.HT
 
 import           Experiment.RABITT.Common
@@ -19,7 +18,6 @@ import           Maths.QuantumNumbers
 import           QState
 import           QState.Configure
 import           QState.OnePhoton
-import           QState.PertWave
 import           QState.Units
 
 
@@ -52,9 +50,5 @@ matElemPairedChannel kappa0 n0 kappa1 mJ = uncurry (kzip (*)) . mapFst (<|)
         <$>(matElemSingleChannel kappa0 n0 kappa1 mJ>>=ketAbsEmi)
 
 matElemSingleChannel :: QNum -> QNum -> QNum -> QNum -> QState Ket
-matElemSingleChannel kappa0 n0 kappa1 mJ = do
-        mEs  <- getMatElem kappa0 n0 kappa1 mJ
-        xi'' <- xi'<$>getReadOption "angleRABITT"
-        getExcitedState kappa0 n0 $ map (*xi'') mEs
-    where xi' mTheta | isJust mTheta = xi kappa1 mJ (fromJust mTheta) 0
-                     | otherwise     = 1
+matElemSingleChannel kappa0 n0 kappa1 mJ = getExcitedState kappa0 n0
+                                            =<<getMatElem kappa0 n0 kappa1 mJ

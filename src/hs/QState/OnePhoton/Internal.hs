@@ -23,7 +23,6 @@ import           QState.Configure.Internal
 import           QState.FilePath.Internal
 import           QState.HartreeFock.Internal
 import           QState.PertWave.Internal
-import           QState.Utility.Parse
 
 import           System.Directory
 import           System.IO.Strict as Strict
@@ -68,7 +67,7 @@ readBreakPointFilesColKappa file kappa0 n0 kappa1 cDict
             | kappa1== -kappa0               =  1
             | kappa1==  kappa0+signum kappa0 =  2
             | otherwise                      = -1
-        colAll col = fileCol (file++"all") kappa0 n0 (col+1) cDict
+        colAll col_ = fileCol (file++"all") kappa0 n0 (col_+1) cDict
 
 
 omegas :: QNum -> QNum -> CDict -> IO [Double]

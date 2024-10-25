@@ -37,4 +37,4 @@ getXi kappa mJ = getReadOption "angleRABITT">>= \mTheta ->
     return $ if isJust mTheta then xi kappa mJ (fromJust mTheta) 0 else 1
 
 timesXi :: QNum -> QNum -> [Scalar] -> QState [Scalar]
-timesXi kappa2 mJ xs = (`map`xs) . (*)<$>getXi kappa2 mJ
+timesXi kappa mJ xs = (`map`xs) . (*)<$>getXi kappa mJ

@@ -65,7 +65,8 @@ getWaveNumbers kappa0 n0 = getEkin kappa0 n0>>=waveNumberEs
 
 
 getMatElem :: QNum -> QNum -> QNum -> QNum -> QState [Scalar]
-getMatElem = withCDictM.::matElem
+getMatElem kappa0 n0 kappa1 mJ = withCDictM (matElem kappa0 n0 kappa1 mJ)
+                                                    >>=timesXi kappa1 mJ
 
 getMatElems :: [QNum] -> [QNum] -> [QNum] -> QNum -> QState [Scalar]
 getMatElems  []               []      _       _  = return $ repeat 0
